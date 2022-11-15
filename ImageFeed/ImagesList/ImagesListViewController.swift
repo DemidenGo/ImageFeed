@@ -11,6 +11,15 @@ import UIKit
 
 final class ImagesListViewController: UIViewController {
 
+    private lazy var photosName = Array(0...19).map { "\($0)" }
+
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
     @IBOutlet private var tableView: UITableView!
 
     override func viewDidLoad() {
@@ -24,8 +33,15 @@ final class ImagesListViewController: UIViewController {
         tableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.identifier)
     }
 
-    private func configCell(for cell: ImagesListCell) {
-
+    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
+        cell.photoImageView.image = UIImage(named: photosName[indexPath.row])
+        cell.dateLabel.text = dateFormatter.string(from: Date())
+        switch (indexPath.row % 2 == 0) {
+        case true:
+            cell.likeButton.setImage(UIImage(named: "LikeActive"), for: .normal)
+        case false:
+            cell.likeButton.setImage(UIImage(named: "LikeNoActive"), for: .normal)
+        }
     }
 }
 
@@ -34,7 +50,7 @@ final class ImagesListViewController: UIViewController {
 extension ImagesListViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return photosName.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -46,7 +62,7 @@ extension ImagesListViewController: UITableViewDataSource {
             return UITableViewCell()
         }
 
-        configCell(for: imagesListCell)
+        configCell(for: imagesListCell, with: indexPath)
         return imagesListCell
     }
 }
