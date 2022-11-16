@@ -13,6 +13,8 @@ final class ImagesListCell: UITableViewCell {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .ypBlack
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = 16
         return view
     }()
 
@@ -21,8 +23,6 @@ final class ImagesListCell: UITableViewCell {
         view.image = UIImage(named: "0")
         view.translatesAutoresizingMaskIntoConstraints = false
         view.contentMode = .scaleAspectFill
-        view.layer.masksToBounds = true
-        view.layer.cornerRadius = 16
         return view
     }()
 
@@ -56,6 +56,7 @@ final class ImagesListCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        contentView.backgroundColor = .ypBlack
         layout()
     }
 
@@ -75,20 +76,19 @@ final class ImagesListCell: UITableViewCell {
         contentView.addSubview(backgroundCellView)
         [photoImageView, gradientView, dateLabel, likeButton].forEach { backgroundCellView.addSubview($0) }
         NSLayoutConstraint.activate([
-            backgroundCellView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            backgroundCellView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            backgroundCellView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            backgroundCellView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            backgroundCellView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            backgroundCellView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            backgroundCellView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            backgroundCellView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
-            photoImageView.topAnchor.constraint(equalTo: backgroundCellView.topAnchor, constant: 8),
-            photoImageView.leadingAnchor.constraint(equalTo: backgroundCellView.leadingAnchor, constant: 16),
-            photoImageView.bottomAnchor.constraint(equalTo: backgroundCellView.bottomAnchor, constant: -8),
-            photoImageView.trailingAnchor.constraint(equalTo: backgroundCellView.trailingAnchor, constant: -16),
+            photoImageView.topAnchor.constraint(equalTo: backgroundCellView.topAnchor),
+            photoImageView.leadingAnchor.constraint(equalTo: backgroundCellView.leadingAnchor),
+            photoImageView.bottomAnchor.constraint(equalTo: backgroundCellView.bottomAnchor),
+            photoImageView.trailingAnchor.constraint(equalTo: backgroundCellView.trailingAnchor),
 
-            dateLabel.heightAnchor.constraint(equalToConstant: 18),
-            dateLabel.widthAnchor.constraint(equalToConstant: 152),
             dateLabel.leadingAnchor.constraint(equalTo: photoImageView.leadingAnchor, constant: 8),
             dateLabel.bottomAnchor.constraint(equalTo: photoImageView.bottomAnchor, constant: -8),
+            dateLabel.trailingAnchor.constraint(equalTo: photoImageView.trailingAnchor, constant: -8),
 
             likeButton.heightAnchor.constraint(equalToConstant: 42),
             likeButton.widthAnchor.constraint(equalToConstant: 42),

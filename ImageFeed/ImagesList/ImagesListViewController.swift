@@ -36,12 +36,8 @@ final class ImagesListViewController: UIViewController {
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         cell.photoImageView.image = UIImage(named: photosName[indexPath.row])
         cell.dateLabel.text = dateFormatter.string(from: Date())
-        switch (indexPath.row % 2 == 0) {
-        case true:
-            cell.likeButton.setImage(UIImage(named: "LikeActive"), for: .normal)
-        case false:
-            cell.likeButton.setImage(UIImage(named: "LikeNoActive"), for: .normal)
-        }
+        let likeButtonImage = indexPath.row % 2 == 0 ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
+        cell.likeButton.setImage(likeButtonImage, for: .normal)
     }
 }
 
