@@ -1,5 +1,7 @@
 # Image Feed
 
+![AppScreenshot1](AppScreenshots/1.png) ![AppScreenshot2](AppScreenshots/2.png) ![AppScreenshot3](AppScreenshots/3.png)
+
 # Ссылки
 
 - [Дизайн в Figma](https://tinyurl.com/image-feed-figma)
@@ -150,3 +152,7 @@
 2. Лента реализована с помощью UITableView.
 3. В приложении использованы UImageView, UIButton, UILabel, TabBarController, NavigationController, NavigationBar, UITableView, UITableViewCell.
 4. Приложение должно поддерживать устройства iPhone с iOS 13 или выше, предусмотрен только портретный режим.
+
+# Cкриншоты приложения
+
+![App screenshot 1](AppScreenshots/1.png)![App screenshot 2](AppScreenshots/2.png)![App screenshot 3](AppScreenshots/3.png)
