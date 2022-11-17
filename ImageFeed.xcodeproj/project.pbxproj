@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9215ECFF2926169100261414 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9215ECFE2926169100261414 /* ProfileViewController.swift */; };
+		9215ED012926347B00261414 /* YS Display-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9215ED002926347B00261414 /* YS Display-Bold.ttf */; };
 		92E8B67B2922305400170888 /* ImagesListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E8B66B2922305400170888 /* ImagesListViewController.swift */; };
 		92E8B67C2922305400170888 /* ImagesListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E8B66C2922305400170888 /* ImagesListCell.swift */; };
 		92E8B67D2922305400170888 /* YS Display Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92E8B66F2922305400170888 /* YS Display Regular.ttf */; };
@@ -20,6 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9215ECFE2926169100261414 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		9215ED002926347B00261414 /* YS Display-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "YS Display-Bold.ttf"; sourceTree = "<group>"; };
 		926EEC4F290A7E1F003DC2E1 /* ImageFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92E8B66B2922305400170888 /* ImagesListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagesListViewController.swift; sourceTree = "<group>"; };
 		92E8B66C2922305400170888 /* ImagesListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagesListCell.swift; sourceTree = "<group>"; };
@@ -45,6 +49,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9215ECFD2926165E00261414 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				9215ECFE2926169100261414 /* ProfileViewController.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
 		926EEC46290A7E1F003DC2E1 = {
 			isa = PBXGroup;
 			children = (
@@ -64,6 +76,7 @@
 		92E8B6692922305400170888 /* ImageFeed */ = {
 			isa = PBXGroup;
 			children = (
+				9215ECFD2926165E00261414 /* Profile */,
 				92E8B66A2922305400170888 /* ImagesList */,
 				92E8B6762922305400170888 /* Helpers */,
 				92E8B66D2922305400170888 /* Resources */,
@@ -97,6 +110,7 @@
 		92E8B66E2922305400170888 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
+				9215ED002926347B00261414 /* YS Display-Bold.ttf */,
 				92E8B66F2922305400170888 /* YS Display Regular.ttf */,
 			);
 			path = Fonts;
@@ -171,6 +185,7 @@
 			files = (
 				92E8B67F2922305400170888 /* LaunchScreen.storyboard in Resources */,
 				92E8B67E2922305400170888 /* Assets.xcassets in Resources */,
+				9215ED012926347B00261414 /* YS Display-Bold.ttf in Resources */,
 				92E8B67D2922305400170888 /* YS Display Regular.ttf in Resources */,
 				92E8B6802922305400170888 /* Main.storyboard in Resources */,
 			);
@@ -187,6 +202,7 @@
 				92E8B6832922305400170888 /* UIColor+Extensions.swift in Sources */,
 				92E8B67B2922305400170888 /* ImagesListViewController.swift in Sources */,
 				92E8B6822922305400170888 /* UIView+Extensions.swift in Sources */,
+				9215ECFF2926169100261414 /* ProfileViewController.swift in Sources */,
 				92E8B67C2922305400170888 /* ImagesListCell.swift in Sources */,
 				92E8B6852922305400170888 /* SceneDelegate.swift in Sources */,
 			);

@@ -24,6 +24,7 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>YS Display Regular.ttf</string>
+		<string>YS Display-Bold.ttf</string>
 	</array>
 </dict>
 </plist>
