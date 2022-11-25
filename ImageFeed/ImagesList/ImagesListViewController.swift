@@ -12,7 +12,7 @@ import UIKit
 final class ImagesListViewController: UIViewController {
 
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
-    private lazy var photosName = Array(0...19).map { "\($0)" }
+    private lazy var photoNames = Array(0...19).map { "\($0)" }
 
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -30,10 +30,11 @@ final class ImagesListViewController: UIViewController {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showSingleImageSegueIdentifier {
-            let viewController = segue.destination as! SingleImageViewController
+            let viewController = segue.destination as? SingleImageViewController
             let indexPath = sender as! IndexPath
-            let image = UIImage(named: "\(photosName[indexPath.row])_full_size") ?? UIImage(named: photosName[indexPath.row])
-            viewController.singleImageView.image = image
+            let photoName = photoNames[indexPath.row]
+            let image = UIImage(named: "\(photoName)_full_size") ?? UIImage(named: photoName)
+            viewController?.singleImageView.image = image
         } else {
             super.prepare(for: segue, sender: sender)
         }
@@ -46,7 +47,7 @@ final class ImagesListViewController: UIViewController {
     }
 
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        cell.photoImageView.image = UIImage(named: photosName[indexPath.row])
+        cell.photoImageView.image = UIImage(named: photoNames[indexPath.row])
         cell.dateLabel.text = dateFormatter.string(from: Date())
         let likeButtonImage = indexPath.row % 2 == 0 ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
         cell.likeButton.setImage(likeButtonImage, for: .normal)
@@ -58,7 +59,7 @@ final class ImagesListViewController: UIViewController {
 extension ImagesListViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photosName.count
+        return photoNames.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
