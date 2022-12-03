@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SingleImageViewController: UIViewController {
+final class SingleImageViewController: UIViewController {
 
     private lazy var scrollView: UIScrollView = {
         let view = UIScrollView()
