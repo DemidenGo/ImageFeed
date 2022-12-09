@@ -28,7 +28,7 @@ final class ProfileViewController: UIViewController {
         return button
     }()
 
-    private lazy var nameLabel: UILabel = {
+    lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 1
@@ -39,7 +39,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
 
-    private lazy var nicknameLabel: UILabel = {
+    lazy var nicknameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "@demidengo"

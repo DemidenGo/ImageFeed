@@ -100,7 +100,7 @@ final class WebViewViewController: UIViewController {
     }
 
     @objc private func backwardButtonAction() {
-        
+        delegate?.webViewViewControllerDidCancel(self)
     }
 
     private func configWebView() {
@@ -124,20 +124,6 @@ final class WebViewViewController: UIViewController {
             progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
-
-    private func code(from navigationAction: WKNavigationAction) -> String? {
-        if
-            let url = navigationAction.request.url,
-            let urlComponents = URLComponents(string: url.absoluteString),
-            urlComponents.path == "/oauth/authorize/native",
-            let items = urlComponents.queryItems,
-            let codeItem = items.first(where: { $0.name == "code" })
-        {
-            return codeItem.value
-        } else {
-            return nil
-        }
-    }
 }
 
 //MARK: - WKNavigationDelegate
@@ -152,8 +138,21 @@ extension WebViewViewController: WKNavigationDelegate {
             delegate?.webViewViewController(self, didAuthenticateWithCode: code)
             decisionHandler(.cancel)
         } else {
-            delegate?.webViewViewControllerDidCancel(self)
             decisionHandler(.allow)
+        }
+    }
+
+    private func code(from navigationAction: WKNavigationAction) -> String? {
+        if
+            let url = navigationAction.request.url,
+            let urlComponents = URLComponents(string: url.absoluteString),
+            urlComponents.path == "/oauth/authorize/native",
+            let items = urlComponents.queryItems,
+            let codeItem = items.first(where: { $0.name == "code" })
+        {
+            return codeItem.value
+        } else {
+            return nil
         }
     }
 }

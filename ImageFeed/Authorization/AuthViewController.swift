@@ -9,6 +9,9 @@ import UIKit
 
 final class AuthViewController: UIViewController {
 
+    // держим сильную ссылку на SplashViewController, иначе он будет удалён из памяти
+    var delegate: AuthViewControllerDelegate?
+
     private lazy var logoImageView: UIImageView = {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -43,9 +46,14 @@ final class AuthViewController: UIViewController {
 
     @objc private func enterButtonTargetForTouchUp() {
         enterButton.backgroundColor = .ypWhite
+        presentWebViewViewController()
+    }
+
+    func presentWebViewViewController() {
         let webViewViewController = WebViewViewController()
         webViewViewController.modalPresentationStyle = .fullScreen
         present(webViewViewController, animated: true)
+        webViewViewController.delegate = self
     }
 
     private func layout() {
@@ -67,10 +75,10 @@ final class AuthViewController: UIViewController {
 extension AuthViewController: WebViewViewControllerDelegate {
 
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        vc.delegate = self
+        delegate?.authViewControllerDelegate(self, didAuthenticateWithCode: code)
     }
 
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
-        vc.dismiss(animated: true)
+        dismiss(animated: true)
     }
 }
