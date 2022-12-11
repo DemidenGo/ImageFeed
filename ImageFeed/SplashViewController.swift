@@ -11,12 +11,17 @@ final class SplashViewController: UIViewController {
 
     private var isUserAuthorized = false
     private let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
+    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage()
 
     private var window: UIWindow {
         guard let window = UIApplication.shared.windows.first else {
             fatalError("Invalid Configuration: unable to get window from UIApplication")
         }
         return window
+    }
+
+    private enum NetworkError: Error {
+        case codeError
     }
 
     private lazy var logoImageView: UIImageView = {
@@ -32,7 +37,7 @@ final class SplashViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
-        layout()
+        setupConstraints()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -43,7 +48,7 @@ final class SplashViewController: UIViewController {
 
     //MARK: - Private funcs
 
-    private func layout() {
+    private func setupConstraints() {
         view.addSubview(logoImageView)
         NSLayoutConstraint.activate([
             logoImageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
@@ -52,33 +57,36 @@ final class SplashViewController: UIViewController {
     }
 
     private func checkUserAuthorization() {
-        if OAuth2TokenStorage().token != "" {
+        if tokenStorage.token != "" {
             isUserAuthorized = true
         }
     }
 
-    private func getUserProfile(_ callback: @escaping (UserProfile) -> Void) {
+    private func getUserProfile(_ callback: @escaping (Result<UserProfile, Error>) -> Void) {
         guard isUserAuthorized else { return }
         let request = makeURLRequest()
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
 
             if let error = error {
                 print("ERROR:", error)
+                callback(.failure(error))
                 return
             }
 
             if let response = response as? HTTPURLResponse,
                response.statusCode != 200 {
                 print("HTTP ERROR:", response.statusCode)
+                callback(.failure(NetworkError.codeError))
                 return
             }
 
             guard let data = data else { return }
             do {
                 let jsonResponse = try JSONDecoder().decode(UserProfile.self, from: data)
-                callback(jsonResponse)
+                callback(.success(jsonResponse))
             } catch {
                 print("DECODING ERROR:", error)
+                callback(.failure(error))
             }
         }
         task.resume()
@@ -90,7 +98,7 @@ final class SplashViewController: UIViewController {
         let profileURL = baseURL.appendingPathComponent("me")
         var request = URLRequest(url: profileURL)
         request.httpMethod = "GET"
-        request.addValue("Authorization: Bearer \(OAuth2TokenStorage().token)", forHTTPHeaderField: "Authorization")
+        request.addValue("Authorization: Bearer \(tokenStorage.token)", forHTTPHeaderField: "Authorization")
         return request
     }
 
@@ -109,11 +117,17 @@ final class SplashViewController: UIViewController {
         guard let profileViewController = tabBarController.viewControllers?[1] as? ProfileViewController else {
             preconditionFailure("Unable to get ProfileViewController from TabBarController")
         }
-        getUserProfile { userProfile in
-            DispatchQueue.main.async {
-                let fullName = userProfile.firstName + " " + userProfile.lastName
-                profileViewController.nameLabel.text = fullName
-                profileViewController.nicknameLabel.text = userProfile.username
+        getUserProfile { result in
+            DispatchQueue.main.async { [weak self] in
+                switch result {
+                case .success(let userProfile):
+                    let fullName = userProfile.firstName + " " + userProfile.lastName
+                    profileViewController.nameLabel.text = fullName
+                    profileViewController.nicknameLabel.text = userProfile.username
+                case .failure(let error):
+                    print("Unable to get user profile. Error: \(error). Try to authorize again")
+                    self?.switchToAuthViewController()
+                }
             }
         }
         window.rootViewController = tabBarController
@@ -141,13 +155,13 @@ extension SplashViewController: AuthViewControllerDelegate {
         OAuth2Service().fetchAuthToken(code: code) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
+                case .success(let accessToken):
+                    self?.tokenStorage.setTokenValue(newValue: accessToken)
+                    self?.isUserAuthorized = true
+                    self?.switchToTabBarController()
                 case .failure(let error):
                     print("ERROR (unable to get access token):", error)
                     self?.switchToAuthViewController()
-                case .success(let accessToken):
-                    OAuth2TokenStorage().setTokenValue(newValue: accessToken)
-                    self?.isUserAuthorized = true
-                    self?.switchToTabBarController()
                 }
             }
         }

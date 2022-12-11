@@ -57,7 +57,7 @@ final class ImagesListCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.backgroundColor = .ypBlack
-        layout()
+        setupConstraints()
     }
 
     required init?(coder: NSCoder) {
@@ -72,7 +72,7 @@ final class ImagesListCell: UITableViewCell {
         }
     }
 
-    private func layout() {
+    private func setupConstraints() {
         contentView.addSubview(backgroundCellView)
         [photoImageView, gradientView, dateLabel, likeButton].forEach { backgroundCellView.addSubview($0) }
         NSLayoutConstraint.activate([

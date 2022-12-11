@@ -63,7 +63,8 @@ final class WebViewViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        layout()
+        view.backgroundColor = .ypWhite
+        setupConstraints()
         configWebView()
     }
 
@@ -108,20 +109,20 @@ final class WebViewViewController: UIViewController {
         webView.navigationDelegate = self
     }
 
-    private func layout() {
-        [webView, backwardButton, progressView].forEach { view.addSubview($0) }
+    private func setupConstraints() {
+        [backwardButton, progressView, webView].forEach { view.addSubview($0) }
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
-            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-
             backwardButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9),
             backwardButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 9),
 
-            progressView.topAnchor.constraint(equalTo: backwardButton.bottomAnchor),
+            progressView.topAnchor.constraint(equalTo: backwardButton.bottomAnchor, constant: 9),
             progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            webView.topAnchor.constraint(equalTo: progressView.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
     }
 }

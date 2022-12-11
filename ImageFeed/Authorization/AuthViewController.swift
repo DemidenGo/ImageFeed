@@ -37,7 +37,7 @@ final class AuthViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
-        layout()
+        setupConstraints()
     }
 
     @objc private func enterButtonTargetForTouchDown() {
@@ -56,7 +56,7 @@ final class AuthViewController: UIViewController {
         webViewViewController.delegate = self
     }
 
-    private func layout() {
+    private func setupConstraints() {
         [logoImageView, enterButton].forEach { view.addSubview($0) }
         NSLayoutConstraint.activate([
             logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),

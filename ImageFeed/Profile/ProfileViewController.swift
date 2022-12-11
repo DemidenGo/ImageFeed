@@ -60,10 +60,10 @@ final class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
-        layout()
+        setupConstraints()
     }
 
-    private func layout() {
+    private func setupConstraints() {
         [avatarImageView, logoutButton, nameLabel, nicknameLabel, statusLabel].forEach { view.addSubview($0) }
         let inset: CGFloat = 8
         NSLayoutConstraint.activate([

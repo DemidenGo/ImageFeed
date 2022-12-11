@@ -48,7 +48,7 @@ final class SingleImageViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
-        layout()
+        setupConstraints()
         rescaleAndCenterImageInScrollView(image: singleImageView.image)
     }
 
@@ -78,7 +78,7 @@ final class SingleImageViewController: UIViewController {
         scrollView.setContentOffset(CGPoint(x: contentOffsetX, y: contentOffsetY), animated: false)
     }
 
-    private func layout() {
+    private func setupConstraints() {
         [scrollView, backwardButton, sharingButton].forEach { view.addSubview($0) }
         scrollView.addSubview(singleImageView)
         NSLayoutConstraint.activate([
