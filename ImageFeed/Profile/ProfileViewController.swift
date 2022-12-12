@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController {
 
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
@@ -28,7 +28,7 @@ class ProfileViewController: UIViewController {
         return button
     }()
 
-    private lazy var nameLabel: UILabel = {
+    lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 1
@@ -39,7 +39,7 @@ class ProfileViewController: UIViewController {
         return label
     }()
 
-    private lazy var nicknameLabel: UILabel = {
+    lazy var nicknameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "@demidengo"
@@ -60,10 +60,10 @@ class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
-        layout()
+        setupConstraints()
     }
 
-    private func layout() {
+    private func setupConstraints() {
         [avatarImageView, logoutButton, nameLabel, nicknameLabel, statusLabel].forEach { view.addSubview($0) }
         let inset: CGFloat = 8
         NSLayoutConstraint.activate([
