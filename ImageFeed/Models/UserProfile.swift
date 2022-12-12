@@ -14,7 +14,7 @@ struct UserProfile: Decodable {
     let firstName: String
     let lastName: String
     let twitterUsername: String?
-    let portfolioURLString: String?
+    let portfolioUrl: String?
     let bio: String?
     let location: String?
     let totalLikes: Int
@@ -26,27 +26,6 @@ struct UserProfile: Decodable {
     let instagramUsername: String?
     let email: String?
     let links: Links
-
-    private enum CodingKeys: String, CodingKey {
-        case id = "id"
-        case updatedAt = "updated_at"
-        case username = "username"
-        case firstName = "first_name"
-        case lastName = "last_name"
-        case twitterUsername = "twitter_username"
-        case portfolioURLString = "portfolio_url"
-        case bio = "bio"
-        case location = "location"
-        case totalLikes = "total_likes"
-        case totalPhotos = "total_photos"
-        case totalCollections = "total_collections"
-        case followedByUser = "followed_by_user"
-        case downloads = "downloads"
-        case uploadsRemaining = "uploads_remaining"
-        case instagramUsername = "instagram_username"
-        case email = "email"
-        case links = "links"
-    }
 }
 
 struct Links: Decodable {

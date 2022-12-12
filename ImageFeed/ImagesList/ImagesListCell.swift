@@ -76,9 +76,9 @@ final class ImagesListCell: UITableViewCell {
         contentView.addSubview(backgroundCellView)
         [photoImageView, gradientView, dateLabel, likeButton].forEach { backgroundCellView.addSubview($0) }
         NSLayoutConstraint.activate([
-            backgroundCellView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            backgroundCellView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
             backgroundCellView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            backgroundCellView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            backgroundCellView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4),
             backgroundCellView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
 
             photoImageView.topAnchor.constraint(equalTo: backgroundCellView.topAnchor),

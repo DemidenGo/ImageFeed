@@ -82,7 +82,9 @@ final class SplashViewController: UIViewController {
 
             guard let data = data else { return }
             do {
-                let jsonResponse = try JSONDecoder().decode(UserProfile.self, from: data)
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let jsonResponse = try decoder.decode(UserProfile.self, from: data)
                 callback(.success(jsonResponse))
             } catch {
                 print("DECODING ERROR:", error)

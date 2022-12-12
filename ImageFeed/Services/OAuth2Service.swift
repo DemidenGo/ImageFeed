@@ -62,7 +62,9 @@ final class OAuth2Service: OAuth2ServiceProtocol {
                 return
             }
             do {
-                let jsonResponse = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
+                let decoder = JSONDecoder()
+                decoder.keyDecodingStrategy = .convertFromSnakeCase
+                let jsonResponse = try decoder.decode(OAuthTokenResponseBody.self, from: data)
                 let accessToken = jsonResponse.accessToken
                 completion(.success(accessToken))
             } catch {
