@@ -6,12 +6,14 @@
 //
 
 import UIKit
+import ProgressHUD
 
 final class SplashViewController: UIViewController {
 
     private var isUserAuthorized = false
     private let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
     private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage()
+    private lazy var oAuth2Service: OAuth2ServiceProtocol = OAuth2Service()
 
     private var window: UIWindow {
         guard let window = UIApplication.shared.windows.first else {
@@ -106,7 +108,9 @@ final class SplashViewController: UIViewController {
 
     private func selectUserFlow() {
         if isUserAuthorized {
+            ProgressHUD.show()
             switchToTabBarController()
+            ProgressHUD.dismiss()
         } else {
             switchToAuthViewController()
         }
@@ -154,16 +158,26 @@ final class SplashViewController: UIViewController {
 extension SplashViewController: AuthViewControllerDelegate {
 
     func authViewControllerDelegate(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
-        OAuth2Service().fetchAuthToken(code: code) { [weak self] result in
+        vc.dismiss(animated: true)
+        ProgressHUD.show()
+        dismiss(animated: true) { [weak self] in
+            self?.fetchAuthToken(usingCode: code)
+        }
+    }
+
+    private func fetchAuthToken(usingCode code: String) {
+        oAuth2Service.fetchAuthToken(code: code) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let accessToken):
                     self?.tokenStorage.setTokenValue(newValue: accessToken)
                     self?.isUserAuthorized = true
                     self?.switchToTabBarController()
+                    ProgressHUD.dismiss()
                 case .failure(let error):
                     print("ERROR (unable to get access token):", error)
                     self?.switchToAuthViewController()
+                    ProgressHUD.dismiss()
                 }
             }
         }
