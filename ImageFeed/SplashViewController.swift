@@ -108,9 +108,9 @@ final class SplashViewController: UIViewController {
 
     private func selectUserFlow() {
         if isUserAuthorized {
-            ProgressHUD.show()
+            UIBlockingProgressHUD.show()
             switchToTabBarController()
-            ProgressHUD.dismiss()
+            UIBlockingProgressHUD.dismiss()
         } else {
             switchToAuthViewController()
         }
@@ -159,7 +159,7 @@ extension SplashViewController: AuthViewControllerDelegate {
 
     func authViewControllerDelegate(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
         vc.dismiss(animated: true)
-        ProgressHUD.show()
+        UIBlockingProgressHUD.show()
         dismiss(animated: true) { [weak self] in
             self?.fetchAuthToken(usingCode: code)
         }
@@ -173,11 +173,11 @@ extension SplashViewController: AuthViewControllerDelegate {
                     self?.tokenStorage.setTokenValue(newValue: accessToken)
                     self?.isUserAuthorized = true
                     self?.switchToTabBarController()
-                    ProgressHUD.dismiss()
+                    UIBlockingProgressHUD.dismiss()
                 case .failure(let error):
                     print("ERROR (unable to get access token):", error)
                     self?.switchToAuthViewController()
-                    ProgressHUD.dismiss()
+                    UIBlockingProgressHUD.dismiss()
                 }
             }
         }
