@@ -9,6 +9,8 @@ import UIKit
 
 final class ProfileViewController: UIViewController {
 
+    private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
+
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -48,7 +50,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
 
-    private lazy var statusLabel: UILabel = {
+    lazy var statusLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Hello, world!"
@@ -57,10 +59,20 @@ final class ProfileViewController: UIViewController {
         return label
     }()
 
+    //MARK: - LifeCycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
         setupConstraints()
+        updateProfileDetails(from: profileService.profile)
+    }
+
+    private func updateProfileDetails(from profile: Profile?) {
+        guard let profile = profile else { preconditionFailure("Unable to get user profile") }
+        nameLabel.text = profile.name
+        nicknameLabel.text = profile.loginName
+        statusLabel.text = profile.bio
     }
 
     private func setupConstraints() {

@@ -25,26 +25,6 @@ final class OAuth2Service: OAuth2ServiceProtocol {
         case codeError
     }
 
-    private func makeURLRequest(usingAuthCode code: String) -> URLRequest {
-        guard let components = URLComponents(string: unsplashTokenURLString) else {
-            preconditionFailure("Unable to construct unsplashTokenURLComponents")
-        }
-        var unsplashTokenURLComponents = components
-        unsplashTokenURLComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: accessKey),
-            URLQueryItem(name: "client_secret", value: secretKey),
-            URLQueryItem(name: "redirect_uri", value: redirectURI),
-            URLQueryItem(name: "code", value: code),
-            URLQueryItem(name: "grant_type", value: "authorization_code")
-        ]
-        guard let url = unsplashTokenURLComponents.url else {
-            preconditionFailure("Unable to construct unsplashTokenURL")
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        return request
-    }
-    
     func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         if lastCode == code { return }
@@ -67,9 +47,7 @@ final class OAuth2Service: OAuth2ServiceProtocol {
                     return
                 }
 
-                guard let data = data else {
-                    return
-                }
+                guard let data = data else { return }
                 do {
                     let decoder = JSONDecoder()
                     decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -79,11 +57,32 @@ final class OAuth2Service: OAuth2ServiceProtocol {
                     self.task = nil
                 } catch {
                     completion(.failure(error))
+                    self.lastCode = nil
                     print("ERROR: \(error)")
                 }
             }
         }
         self.task = task
         task.resume()
+    }
+
+    private func makeURLRequest(usingAuthCode code: String) -> URLRequest {
+        guard let components = URLComponents(string: unsplashTokenURLString) else {
+            preconditionFailure("Unable to construct unsplashTokenURLComponents")
+        }
+        var unsplashTokenURLComponents = components
+        unsplashTokenURLComponents.queryItems = [
+            URLQueryItem(name: "client_id", value: accessKey),
+            URLQueryItem(name: "client_secret", value: secretKey),
+            URLQueryItem(name: "redirect_uri", value: redirectURI),
+            URLQueryItem(name: "code", value: code),
+            URLQueryItem(name: "grant_type", value: "authorization_code")
+        ]
+        guard let url = unsplashTokenURLComponents.url else {
+            preconditionFailure("Unable to construct unsplashTokenURL")
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        return request
     }
 }

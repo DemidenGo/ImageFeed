@@ -14,16 +14,13 @@ final class SplashViewController: UIViewController {
     private let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
     private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage()
     private lazy var oAuth2Service: OAuth2ServiceProtocol = OAuth2Service()
+    private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
 
     private var window: UIWindow {
         guard let window = UIApplication.shared.windows.first else {
             fatalError("Invalid Configuration: unable to get window from UIApplication")
         }
         return window
-    }
-
-    private enum NetworkError: Error {
-        case codeError
     }
 
     private lazy var logoImageView: UIImageView = {
@@ -64,53 +61,10 @@ final class SplashViewController: UIViewController {
         }
     }
 
-    private func getUserProfile(_ callback: @escaping (Result<UserProfile, Error>) -> Void) {
-        guard isUserAuthorized else { return }
-        let request = makeURLRequest()
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-
-            if let error = error {
-                print("ERROR:", error)
-                callback(.failure(error))
-                return
-            }
-
-            if let response = response as? HTTPURLResponse,
-               response.statusCode != 200 {
-                print("HTTP ERROR:", response.statusCode)
-                callback(.failure(NetworkError.codeError))
-                return
-            }
-
-            guard let data = data else { return }
-            do {
-                let decoder = JSONDecoder()
-                decoder.keyDecodingStrategy = .convertFromSnakeCase
-                let jsonResponse = try decoder.decode(UserProfile.self, from: data)
-                callback(.success(jsonResponse))
-            } catch {
-                print("DECODING ERROR:", error)
-                callback(.failure(error))
-            }
-        }
-        task.resume()
-        return
-    }
-
-    private func makeURLRequest() -> URLRequest {
-        let baseURL = defaultBaseURL
-        let profileURL = baseURL.appendingPathComponent("me")
-        var request = URLRequest(url: profileURL)
-        request.httpMethod = "GET"
-        request.addValue("Authorization: Bearer \(tokenStorage.token)", forHTTPHeaderField: "Authorization")
-        return request
-    }
-
     private func selectUserFlow() {
         if isUserAuthorized {
             UIBlockingProgressHUD.show()
-            switchToTabBarController()
-            UIBlockingProgressHUD.dismiss()
+            fetchProfile(token: tokenStorage.token)
         } else {
             switchToAuthViewController()
         }
@@ -119,22 +73,6 @@ final class SplashViewController: UIViewController {
     private func switchToTabBarController() {
         guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController else {
             preconditionFailure("Unable to get TabBarController from Storyboard")
-        }
-        guard let profileViewController = tabBarController.viewControllers?[1] as? ProfileViewController else {
-            preconditionFailure("Unable to get ProfileViewController from TabBarController")
-        }
-        getUserProfile { result in
-            DispatchQueue.main.async { [weak self] in
-                switch result {
-                case .success(let userProfile):
-                    let fullName = userProfile.firstName + " " + userProfile.lastName
-                    profileViewController.nameLabel.text = fullName
-                    profileViewController.nicknameLabel.text = userProfile.username
-                case .failure(let error):
-                    print("Unable to get user profile. Error: \(error). Try to authorize again")
-                    self?.switchToAuthViewController()
-                }
-            }
         }
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
@@ -159,8 +97,8 @@ extension SplashViewController: AuthViewControllerDelegate {
 
     func authViewControllerDelegate(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
         vc.dismiss(animated: true)
-        UIBlockingProgressHUD.show()
         dismiss(animated: true) { [weak self] in
+            UIBlockingProgressHUD.show()
             self?.fetchAuthToken(usingCode: code)
         }
     }
@@ -172,12 +110,27 @@ extension SplashViewController: AuthViewControllerDelegate {
                 case .success(let accessToken):
                     self?.tokenStorage.setTokenValue(newValue: accessToken)
                     self?.isUserAuthorized = true
-                    self?.switchToTabBarController()
-                    UIBlockingProgressHUD.dismiss()
+                    self?.fetchProfile(token: accessToken)
                 case .failure(let error):
                     print("ERROR (unable to get access token):", error)
                     self?.switchToAuthViewController()
                     UIBlockingProgressHUD.dismiss()
+                }
+            }
+        }
+    }
+
+    private func fetchProfile(token: String) {
+        profileService.fetchProfile { result in
+            DispatchQueue.main.async { [weak self] in
+                switch result {
+                case .success:
+                    UIBlockingProgressHUD.dismiss()
+                    self?.switchToTabBarController()
+                case .failure(let error):
+                    print("Unable to get user profile. Error: \(error). Try to authorize again")
+                    UIBlockingProgressHUD.dismiss()
+                    self?.switchToAuthViewController()
                 }
             }
         }
