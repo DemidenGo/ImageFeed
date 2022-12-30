@@ -23,48 +23,22 @@ final class ProfileImageService: ProfileImageServiceProtocol {
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private(set) var avatarURL: String?
 
-    private enum NetworkError: Error {
-        case codeError
-    }
-
     func fetchProfileImageURL(for username: String, _ completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         if lastUsername == username { return }
         task?.cancel()
         lastUsername = username
         let request = makeURLRequest()
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-
-            DispatchQueue.main.async {
-
-                if let error = error {
-                    print("ERROR:", error)
-                    completion(.failure(error))
-                    self.lastUsername = nil
-                    return
-                }
-
-                if let response = response as? HTTPURLResponse,
-                   response.statusCode != 200 {
-                    print("HTTP ERROR in ProfileImageService:", response.statusCode)
-                    completion(.failure(NetworkError.codeError))
-                    return
-                }
-
-                guard let data = data else { return }
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let jsonResponse = try decoder.decode(UserResult.self, from: data)
-                    let profileImageURL = jsonResponse.profileImage.small
-                    self.avatarURL = profileImageURL
-                    completion(.success(profileImageURL))
-                    self.task = nil
-                } catch {
-                    print("DECODING ERROR:", error)
-                    completion(.failure(error))
-                    self.lastUsername = nil
-                }
+        let task = session.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
+            switch result {
+            case .success(let jsonResponse):
+                let profileImageURL = jsonResponse.profileImage.small
+                self?.avatarURL = profileImageURL
+                completion(.success(profileImageURL))
+                self?.task = nil
+            case .failure(let error):
+                completion(.failure(error))
+                self?.lastUsername = nil
             }
         }
         self.task = task

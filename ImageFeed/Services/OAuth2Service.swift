@@ -21,46 +21,21 @@ final class OAuth2Service: OAuth2ServiceProtocol {
     private var task: URLSessionTask?
     private var lastCode: String?
 
-    private enum NetworkError: Error {
-        case codeError
-    }
-
     func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         if lastCode == code { return }
         task?.cancel()
         lastCode = code
         let request = makeURLRequest(usingAuthCode: code)
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-
-            DispatchQueue.main.async {
-
-                if let error = error {
-                    completion(.failure(error))
-                    self.lastCode = nil
-                    return
-                }
-
-                if let response = response as? HTTPURLResponse,
-                   response.statusCode < 200 && response.statusCode >= 300 {
-                    print("HTTP ERROR in OAuth2Service:", response.statusCode)
-                    completion(.failure(NetworkError.codeError))
-                    return
-                }
-
-                guard let data = data else { return }
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let jsonResponse = try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    let accessToken = jsonResponse.accessToken
-                    completion(.success(accessToken))
-                    self.task = nil
-                } catch {
-                    completion(.failure(error))
-                    self.lastCode = nil
-                    print("ERROR: \(error)")
-                }
+        let task = session.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+            switch result {
+            case .success(let jsonResponse):
+                let accessToken = jsonResponse.accessToken
+                completion(.success(accessToken))
+                self?.task = nil
+            case .failure(let error):
+                completion(.failure(error))
+                self?.lastCode = nil
             }
         }
         self.task = task
