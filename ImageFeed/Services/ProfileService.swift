@@ -44,7 +44,7 @@ final class ProfileService: ProfileServiceProtocol {
 
                 if let response = response as? HTTPURLResponse,
                    response.statusCode != 200 {
-                    print("HTTP ERROR:", response.statusCode)
+                    print("HTTP ERROR in ProfileService:", response.statusCode)
                     completion(.failure(NetworkError.codeError))
                     return
                 }

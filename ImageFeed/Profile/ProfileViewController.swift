@@ -10,6 +10,8 @@ import UIKit
 final class ProfileViewController: UIViewController {
 
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
+    private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
+    private var profileImageServiceObserver: NSObjectProtocol?
 
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
@@ -64,8 +66,10 @@ final class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
+        addProfileImageServiceObserver()
         setupConstraints()
         updateProfileDetails(from: profileService.profile)
+        updateAvatar()
     }
 
     private func updateProfileDetails(from profile: Profile?) {
@@ -73,6 +77,24 @@ final class ProfileViewController: UIViewController {
         nameLabel.text = profile.name
         nicknameLabel.text = profile.loginName
         statusLabel.text = profile.bio
+    }
+
+    private func addProfileImageServiceObserver() {
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main) { [weak self] _ in
+                    self?.updateAvatar()
+                }
+    }
+
+    private func updateAvatar() {
+        guard
+            let profileImageURL = profileImageService.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+        // TODO
     }
 
     private func setupConstraints() {

@@ -43,6 +43,7 @@ final class OAuth2Service: OAuth2ServiceProtocol {
 
                 if let response = response as? HTTPURLResponse,
                    response.statusCode < 200 && response.statusCode >= 300 {
+                    print("HTTP ERROR in OAuth2Service:", response.statusCode)
                     completion(.failure(NetworkError.codeError))
                     return
                 }

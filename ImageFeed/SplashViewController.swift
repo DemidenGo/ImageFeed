@@ -15,6 +15,7 @@ final class SplashViewController: UIViewController {
     private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage()
     private lazy var oAuth2Service: OAuth2ServiceProtocol = OAuth2Service()
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
+    private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
 
     private var window: UIWindow {
         guard let window = UIApplication.shared.windows.first else {
@@ -124,13 +125,33 @@ extension SplashViewController: AuthViewControllerDelegate {
         profileService.fetchProfile { result in
             DispatchQueue.main.async { [weak self] in
                 switch result {
-                case .success:
+                case .success(let profile):
+                    let username = profile.username
+                    self?.fetchProfileImageURL(for: username)
                     UIBlockingProgressHUD.dismiss()
                     self?.switchToTabBarController()
                 case .failure(let error):
                     print("Unable to get user profile. Error: \(error). Try to authorize again")
                     UIBlockingProgressHUD.dismiss()
                     self?.switchToAuthViewController()
+                }
+            }
+        }
+    }
+
+    private func fetchProfileImageURL(for username: String) {
+        profileImageService.fetchProfileImageURL(for: username) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let profileImageURL):
+                    NotificationCenter.default
+                        .post(
+                            name: ProfileImageService.didChangeNotification,
+                            object: self.profileImageService,
+                            userInfo: ["URL": profileImageURL])
+                case .failure(let error):
+                    print("Unable to get user image URL. Error: \(error). Try to authorize again")
+                    self.switchToAuthViewController()
                 }
             }
         }
