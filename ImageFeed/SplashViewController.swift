@@ -16,6 +16,7 @@ final class SplashViewController: UIViewController {
     private lazy var oAuth2Service: OAuth2ServiceProtocol = OAuth2Service()
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
+    private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
 
     private var window: UIWindow {
         guard let window = UIApplication.shared.windows.first else {
@@ -114,16 +115,18 @@ extension SplashViewController: AuthViewControllerDelegate {
                     self?.fetchProfile(token: accessToken)
                 case .failure(let error):
                     print("ERROR (unable to get access token):", error)
-                    self?.switchToAuthViewController()
                     UIBlockingProgressHUD.dismiss()
+                    self?.errorAlertPresenter.presentAlert {
+                        self?.switchToAuthViewController()
+                    }
                 }
             }
         }
     }
 
     private func fetchProfile(token: String) {
-        profileService.fetchProfile { result in
-            DispatchQueue.main.async { [weak self] in
+        profileService.fetchProfile { [weak self] result in
+            DispatchQueue.main.async {
                 switch result {
                 case .success(let profile):
                     let username = profile.username
@@ -133,25 +136,29 @@ extension SplashViewController: AuthViewControllerDelegate {
                 case .failure(let error):
                     print("Unable to get user profile. Error: \(error). Try to authorize again")
                     UIBlockingProgressHUD.dismiss()
-                    self?.switchToAuthViewController()
+                    self?.errorAlertPresenter.presentAlert {
+                        self?.switchToAuthViewController()
+                    }
                 }
             }
         }
     }
 
     private func fetchProfileImageURL(for username: String) {
-        profileImageService.fetchProfileImageURL(for: username) { result in
+        profileImageService.fetchProfileImageURL(for: username) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let profileImageURL):
                     NotificationCenter.default
                         .post(
                             name: ProfileImageService.didChangeNotification,
-                            object: self.profileImageService,
+                            object: self?.profileImageService,
                             userInfo: ["URL": profileImageURL])
                 case .failure(let error):
                     print("Unable to get user image URL. Error: \(error). Try to authorize again")
-                    self.switchToAuthViewController()
+                    self?.errorAlertPresenter.presentAlert {
+                        self?.switchToAuthViewController()
+                    }
                 }
             }
         }
