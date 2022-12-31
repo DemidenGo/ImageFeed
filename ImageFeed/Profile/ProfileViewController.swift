@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
 
@@ -94,7 +95,19 @@ final class ProfileViewController: UIViewController {
             let profileImageURL = profileImageService.avatarURL,
             let url = URL(string: profileImageURL)
         else { return }
-        // TODO
+        let cache = ImageCache.default
+        cache.clearCache()
+        avatarImageView.kf.indicatorType = .activity
+        avatarImageView.kf.setImage(with: url,
+                                    placeholder: UIImage(named: "AvatarPlaceholder.png")) { [weak self] result in
+            switch result {
+            case .success(let value):
+                self?.avatarImageView.image = value.image
+            case .failure(let error):
+                print("ERROR update avatar: ", error.errorCode, " ", error.localizedDescription)
+                self?.updateAvatar()
+            }
+        }
     }
 
     private func setupConstraints() {
