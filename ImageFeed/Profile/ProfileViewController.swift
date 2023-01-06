@@ -6,8 +6,13 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
+
+    private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
+    private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
+    private var profileImageServiceObserver: NSObjectProtocol?
 
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
@@ -48,7 +53,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
 
-    private lazy var statusLabel: UILabel = {
+    lazy var statusLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Hello, world!"
@@ -57,10 +62,52 @@ final class ProfileViewController: UIViewController {
         return label
     }()
 
+    //MARK: - LifeCycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
+        addProfileImageServiceObserver()
         setupConstraints()
+        updateProfileDetails(from: profileService.profile)
+        updateAvatar()
+    }
+
+    private func updateProfileDetails(from profile: Profile?) {
+        guard let profile = profile else { preconditionFailure("Unable to get user profile") }
+        nameLabel.text = profile.name
+        nicknameLabel.text = profile.loginName
+        statusLabel.text = profile.bio
+    }
+
+    private func addProfileImageServiceObserver() {
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main) { [weak self] _ in
+                    self?.updateAvatar()
+                }
+    }
+
+    private func updateAvatar() {
+        guard
+            let profileImageURL = profileImageService.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+        let cache = ImageCache.default
+        cache.clearCache()
+        avatarImageView.kf.indicatorType = .activity
+        avatarImageView.kf.setImage(with: url,
+                                    placeholder: UIImage(named: "AvatarPlaceholder.png")) { [weak self] result in
+            switch result {
+            case .success(let value):
+                self?.avatarImageView.image = value.image
+            case .failure(let error):
+                print("ERROR update avatar: ", error.errorCode, " ", error.localizedDescription)
+                self?.updateAvatar()
+            }
+        }
     }
 
     private func setupConstraints() {

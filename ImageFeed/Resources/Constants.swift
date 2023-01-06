@@ -17,3 +17,4 @@ var defaultBaseURL: URL {
     }
     return url
 }
+let session = URLSession.shared

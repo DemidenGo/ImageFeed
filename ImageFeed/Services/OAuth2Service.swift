@@ -9,18 +9,37 @@ import UIKit
 
 //MARK: - OAuth2Protocol
 
-protocol OAuth2ServiceProtocol {
+protocol AuthServiceProtocol {
     func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void)
 }
 
 //MARK: - OAuth2Service
 
-final class OAuth2Service: OAuth2ServiceProtocol {
+final class OAuth2Service: AuthServiceProtocol {
 
     private let unsplashTokenURLString = "https://unsplash.com/oauth/token"
+    private var task: URLSessionTask?
+    private var lastCode: String?
 
-    private enum NetworkError: Error {
-        case codeError
+    func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        assert(Thread.isMainThread)
+        if lastCode == code { return }
+        task?.cancel()
+        lastCode = code
+        let request = makeURLRequest(usingAuthCode: code)
+        let task = session.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+            switch result {
+            case .success(let jsonResponse):
+                let accessToken = jsonResponse.accessToken
+                completion(.success(accessToken))
+                self?.task = nil
+            case .failure(let error):
+                completion(.failure(error))
+                self?.lastCode = nil
+            }
+        }
+        self.task = task
+        task.resume()
     }
 
     private func makeURLRequest(usingAuthCode code: String) -> URLRequest {
@@ -41,37 +60,5 @@ final class OAuth2Service: OAuth2ServiceProtocol {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         return request
-    }
-    
-    func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let request = makeURLRequest(usingAuthCode: code)
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-
-            if let response = response as? HTTPURLResponse,
-               response.statusCode < 200 && response.statusCode >= 300 {
-                completion(.failure(NetworkError.codeError))
-                return
-            }
-
-            guard let data = data else {
-                return
-            }
-            do {
-                let decoder = JSONDecoder()
-                decoder.keyDecodingStrategy = .convertFromSnakeCase
-                let jsonResponse = try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                let accessToken = jsonResponse.accessToken
-                completion(.success(accessToken))
-            } catch {
-                completion(.failure(error))
-                print("ERROR: \(error)")
-            }
-        }
-        task.resume()
     }
 }
