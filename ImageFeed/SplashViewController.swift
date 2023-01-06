@@ -12,8 +12,8 @@ final class SplashViewController: UIViewController {
 
     private var isUserAuthorized = false
     private let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
-    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage()
-    private lazy var oAuth2Service: OAuth2ServiceProtocol = OAuth2Service()
+    private lazy var authService: AuthServiceProtocol = OAuth2Service()
+    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage.shared
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
@@ -106,7 +106,7 @@ extension SplashViewController: AuthViewControllerDelegate {
     }
 
     private func fetchAuthToken(usingCode code: String) {
-        oAuth2Service.fetchAuthToken(code: code) { [weak self] result in
+        authService.fetchAuthToken(code: code) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let accessToken):

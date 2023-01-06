@@ -9,13 +9,13 @@ import UIKit
 
 //MARK: - OAuth2Protocol
 
-protocol OAuth2ServiceProtocol {
+protocol AuthServiceProtocol {
     func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void)
 }
 
 //MARK: - OAuth2Service
 
-final class OAuth2Service: OAuth2ServiceProtocol {
+final class OAuth2Service: AuthServiceProtocol {
 
     private let unsplashTokenURLString = "https://unsplash.com/oauth/token"
     private var task: URLSessionTask?

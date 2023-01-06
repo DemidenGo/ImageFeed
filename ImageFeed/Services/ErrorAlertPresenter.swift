@@ -19,10 +19,11 @@ final class ErrorAlertPresenter: ErrorAlertPresenterProtocol {
     }
 
     func presentAlert(buttonAction: @escaping () -> Void) {
-        let alert = UIAlertController(title: "Что-то пошло не так...",
+        let alert = UIAlertController(title: "Что-то пошло не так(",
                                       message: "Не удалось войти в систему",
                                       preferredStyle: .alert)
-        let action = UIAlertAction(title: "Ok", style: .default) { _ in
+        let action = UIAlertAction(title: "Ок", style: .default) { _ in
+            alert.dismiss(animated: true)
             buttonAction()
         }
         alert.addAction(action)

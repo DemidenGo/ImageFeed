@@ -19,7 +19,7 @@ final class ProfileImageService: ProfileImageServiceProtocol {
 
     private var task: URLSessionTask?
     private var lastUsername: String?
-    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage()
+    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage.shared
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private(set) var avatarURL: String?
 

@@ -30,7 +30,7 @@ extension URLSession {
             }
 
             if let response = response as? HTTPURLResponse,
-               response.statusCode < 200 && response.statusCode >= 300 {
+               response.statusCode < 200 || response.statusCode >= 300 {
                 print("HTTP ERROR when trying to get data for \(T.self) model:", response.statusCode)
                 fulfillCompletionOnMainThread(.failure(NetworkError.codeError))
                 return
