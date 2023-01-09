@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ImagesListCell: UITableViewCell {
 
@@ -62,6 +63,12 @@ final class ImagesListCell: UITableViewCell {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        // Отменяем загрузку, чтобы избежать багов при переиспользовании ячеек
+        photoImageView.kf.cancelDownloadTask()
     }
 
     @objc private func buttonAction() {

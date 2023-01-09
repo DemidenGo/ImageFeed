@@ -11,8 +11,13 @@ import UIKit
 
 final class ImagesListViewController: UIViewController {
 
+    private lazy var imagesListService: ImagesListServiceProtocol = ImagesListService.shared
+    private var imagesListServiceObserver: NSObjectProtocol?
+
+    private let placeholderImage = UIImage(named: "PlaceholderImageForFeed.png")
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private lazy var photoNames = Array(0...19).map { "\($0)" }
+    private lazy var photos = [Photo]()
 
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -26,6 +31,8 @@ final class ImagesListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
+        addImagesListServiceObserver()
+        imagesListService.fetchNextPageOfPhotos()
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -46,11 +53,45 @@ final class ImagesListViewController: UIViewController {
         tableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.identifier)
     }
 
+    private func addImagesListServiceObserver() {
+        imagesListServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ImagesListService.didChangeNotification,
+                object: nil,
+                queue: .main) { [weak self] _ in
+                    self?.updateTableViewAnimated()
+                }
+    }
+
+    private func updateTableViewAnimated() {
+        let oldRowCount = photos.count
+        let newRowCount = imagesListService.photos.count
+        photos = imagesListService.photos
+        if oldRowCount != newRowCount {
+            tableView.performBatchUpdates {
+                let newIndexPaths = (oldRowCount..<newRowCount).map { i in
+                    IndexPath(row: i, section: 0)
+                }
+                tableView.insertRows(at: newIndexPaths, with: .automatic)
+            } completion: { _ in }
+        }
+    }
+
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        cell.photoImageView.image = UIImage(named: photoNames[indexPath.row])
-        cell.dateLabel.text = dateFormatter.string(from: Date())
-        let likeButtonImage = indexPath.row % 2 == 0 ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
-        cell.likeButton.setImage(likeButtonImage, for: .normal)
+        guard let loadedPhoto = imagesListService.photos[safe: indexPath.row],
+              let url = URL(string: loadedPhoto.thumbImageURL),
+              let placeholderImageHeight = placeholderImage?.size.height else {
+            print("Error: unable to get thumb photo URL from photos array")
+            imagesListService.fetchNextPageOfPhotos()
+            return
+        }
+        let loadedPhotoHeight = loadedPhoto.size.height
+        cell.photoImageView.kf.indicatorType = .activity
+        cell.photoImageView.kf.setImage(with: url, placeholder: placeholderImage) { _ in
+            if loadedPhotoHeight != placeholderImageHeight {
+                self.tableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+        }
     }
 }
 
@@ -59,7 +100,7 @@ final class ImagesListViewController: UIViewController {
 extension ImagesListViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photoNames.count
+        return photos.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -82,5 +123,11 @@ extension ImagesListViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
+    }
+
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row + 1 == photos.count {
+            imagesListService.fetchNextPageOfPhotos()
+        }
     }
 }

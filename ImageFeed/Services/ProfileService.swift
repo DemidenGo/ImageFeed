@@ -16,7 +16,7 @@ final class ProfileService: ProfileServiceProtocol {
 
     static let shared = ProfileService()
 
-    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage.shared
+    private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
     private var task: URLSessionTask?
     private var lastToken: String?
     private(set) var profile: Profile?

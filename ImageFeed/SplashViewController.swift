@@ -13,7 +13,7 @@ final class SplashViewController: UIViewController {
     private var isUserAuthorized = false
     private let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
     private lazy var authService: AuthServiceProtocol = OAuth2Service()
-    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage.shared
+    private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
