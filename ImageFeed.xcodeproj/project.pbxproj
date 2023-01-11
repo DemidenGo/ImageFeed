@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		920F5DEE296EA44900450B1E /* ProfileViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920F5DED296EA44900450B1E /* ProfileViewControllerDelegate.swift */; };
 		92147F68293F5544003B9694 /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92147F67293F5544003B9694 /* SplashViewController.swift */; };
 		9215ECFF2926169100261414 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9215ECFE2926169100261414 /* ProfileViewController.swift */; };
 		9215ED012926347B00261414 /* YS Display-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9215ED002926347B00261414 /* YS Display-Bold.ttf */; };
@@ -47,6 +48,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		920F5DED296EA44900450B1E /* ProfileViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewControllerDelegate.swift; sourceTree = "<group>"; };
 		92147F67293F5544003B9694 /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		9215ECFE2926169100261414 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		9215ED002926347B00261414 /* YS Display-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "YS Display-Bold.ttf"; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				9215ECFE2926169100261414 /* ProfileViewController.swift */,
+				920F5DED296EA44900450B1E /* ProfileViewControllerDelegate.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -337,6 +340,7 @@
 				924780442941C3B000D80A31 /* AuthViewControllerDelegate.swift in Sources */,
 				92E8B6852922305400170888 /* SceneDelegate.swift in Sources */,
 				922591CC295DBF4B00FC9611 /* ProfileImage.swift in Sources */,
+				920F5DEE296EA44900450B1E /* ProfileViewControllerDelegate.swift in Sources */,
 				92166F3D29349EE80073E518 /* Constants.swift in Sources */,
 				92517224296C4CF200F6749D /* URLRequest+Extensions.swift in Sources */,
 				92147F68293F5544003B9694 /* SplashViewController.swift in Sources */,

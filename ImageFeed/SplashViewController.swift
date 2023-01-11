@@ -76,6 +76,10 @@ final class SplashViewController: UIViewController {
         guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController else {
             preconditionFailure("Unable to get TabBarController from Storyboard")
         }
+        guard let profileViewController = tabBarController.viewControllers?[safe: 1] as? ProfileViewController else {
+            preconditionFailure("Unable to get profileViewController from tabBarController")
+        }
+        profileViewController.delegate = self
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
     }
@@ -162,5 +166,13 @@ extension SplashViewController: AuthViewControllerDelegate {
                 }
             }
         }
+    }
+}
+
+extension SplashViewController: ProfileViewControllerDelegate {
+    func profileViewControllerDidLogout() {
+        tokenStorage.setTokenValue(newValue: "")
+        WebViewViewController.clean()
+        switchToAuthViewController()
     }
 }

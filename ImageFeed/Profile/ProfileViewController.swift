@@ -10,6 +10,8 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
 
+    var delegate: ProfileViewControllerDelegate?
+
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
@@ -30,6 +32,7 @@ final class ProfileViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "Exit"), for: .normal)
         button.tintColor = .ypRed
+        button.addTarget(self, action: #selector(logoutButtonAction), for: .touchUpInside)
         return button
     }()
 
@@ -71,6 +74,10 @@ final class ProfileViewController: UIViewController {
         setupConstraints()
         updateProfileDetails(from: profileService.profile)
         updateAvatar()
+    }
+
+    @objc private func logoutButtonAction() {
+        delegate?.profileViewControllerDidLogout()
     }
 
     private func updateProfileDetails(from profile: Profile?) {
