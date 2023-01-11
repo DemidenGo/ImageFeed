@@ -13,7 +13,7 @@ final class SplashViewController: UIViewController {
     private var isUserAuthorized = false
     private let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
     private lazy var authService: AuthServiceProtocol = OAuth2Service()
-    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage.shared
+    private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
@@ -76,6 +76,10 @@ final class SplashViewController: UIViewController {
         guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController else {
             preconditionFailure("Unable to get TabBarController from Storyboard")
         }
+        guard let profileViewController = tabBarController.viewControllers?[safe: 1] as? ProfileViewController else {
+            preconditionFailure("Unable to get profileViewController from tabBarController")
+        }
+        profileViewController.delegate = self
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
     }
@@ -116,7 +120,9 @@ extension SplashViewController: AuthViewControllerDelegate {
                 case .failure(let error):
                     print("ERROR (unable to get access token):", error)
                     UIBlockingProgressHUD.dismiss()
-                    self?.errorAlertPresenter.presentAlert {
+                    self?.errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
+                                                           message: "Не удалось войти в систему",
+                                                           buttonTitles: "Ок") {
                         self?.switchToAuthViewController()
                     }
                 }
@@ -136,7 +142,9 @@ extension SplashViewController: AuthViewControllerDelegate {
                 case .failure(let error):
                     print("Unable to get user profile. Error: \(error). Try to authorize again")
                     UIBlockingProgressHUD.dismiss()
-                    self?.errorAlertPresenter.presentAlert {
+                    self?.errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
+                                                           message: "Не удалось войти в систему",
+                                                           buttonTitles: "Ок") {
                         self?.switchToAuthViewController()
                     }
                 }
@@ -156,11 +164,23 @@ extension SplashViewController: AuthViewControllerDelegate {
                             userInfo: ["URL": profileImageURL])
                 case .failure(let error):
                     print("Unable to get user image URL. Error: \(error). Try to authorize again")
-                    self?.errorAlertPresenter.presentAlert {
+                    self?.errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
+                                                           message: "Не удалось войти в систему",
+                                                           buttonTitles: "Ок") {
                         self?.switchToAuthViewController()
                     }
                 }
             }
         }
+    }
+}
+
+// MARK: - ProfileViewControllerDelegate
+
+extension SplashViewController: ProfileViewControllerDelegate {
+    func profileViewControllerDidLogout() {
+        tokenStorage.setTokenValue(newValue: "")
+        WebViewViewController.clean()
+        switchToAuthViewController()
     }
 }

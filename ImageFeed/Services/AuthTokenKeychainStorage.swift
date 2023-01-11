@@ -8,14 +8,14 @@
 import UIKit
 import SwiftKeychainWrapper
 
-protocol OAuth2TokenStorageProtocol {
+protocol AuthTokenStorageProtocol {
     var token: String { get }
     func setTokenValue(newValue: String)
 }
 
-final class OAuth2TokenStorage: OAuth2TokenStorageProtocol {
+final class AuthTokenKeychainStorage: AuthTokenStorageProtocol {
 
-    static let shared = OAuth2TokenStorage()
+    static let shared = AuthTokenKeychainStorage()
 
     private enum Keys: String {
         case accessToken

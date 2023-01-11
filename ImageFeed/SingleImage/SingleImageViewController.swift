@@ -22,7 +22,6 @@ final class SingleImageViewController: UIViewController {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
-        imageView.image = UIImage(named: "0")
         imageView.layer.masksToBounds = true
         return imageView
     }()
@@ -52,17 +51,7 @@ final class SingleImageViewController: UIViewController {
         rescaleAndCenterImageInScrollView(image: singleImageView.image)
     }
 
-    @objc private func backwardButtonAction() {
-        dismiss(animated: true)
-    }
-
-    @objc private func sharingButtonAction() {
-        guard let image = singleImageView.image else { return }
-        let viewController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-        present(viewController, animated: true)
-    }
-
-    private func rescaleAndCenterImageInScrollView(image: UIImage?) {
+    func rescaleAndCenterImageInScrollView(image: UIImage?) {
         guard let image = image else { return }
         view.layoutIfNeeded()
         let visibleRectSize = scrollView.bounds.size
@@ -76,6 +65,16 @@ final class SingleImageViewController: UIViewController {
         let contentOffsetX = (newContentSize.width - visibleRectSize.width) / 2
         let contentOffsetY = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: contentOffsetX, y: contentOffsetY), animated: false)
+    }
+
+    @objc private func backwardButtonAction() {
+        dismiss(animated: true)
+    }
+
+    @objc private func sharingButtonAction() {
+        guard let image = singleImageView.image else { return }
+        let viewController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        present(viewController, animated: true)
     }
 
     private func setupConstraints() {
