@@ -120,7 +120,9 @@ extension SplashViewController: AuthViewControllerDelegate {
                 case .failure(let error):
                     print("ERROR (unable to get access token):", error)
                     UIBlockingProgressHUD.dismiss()
-                    self?.errorAlertPresenter.presentAlert(message: "Не удалось войти в систему") {
+                    self?.errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
+                                                           message: "Не удалось войти в систему",
+                                                           buttonTitles: "Ок") {
                         self?.switchToAuthViewController()
                     }
                 }
@@ -140,7 +142,9 @@ extension SplashViewController: AuthViewControllerDelegate {
                 case .failure(let error):
                     print("Unable to get user profile. Error: \(error). Try to authorize again")
                     UIBlockingProgressHUD.dismiss()
-                    self?.errorAlertPresenter.presentAlert(message: "Не удалось войти в систему") {
+                    self?.errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
+                                                           message: "Не удалось войти в систему",
+                                                           buttonTitles: "Ок") {
                         self?.switchToAuthViewController()
                     }
                 }
@@ -160,7 +164,9 @@ extension SplashViewController: AuthViewControllerDelegate {
                             userInfo: ["URL": profileImageURL])
                 case .failure(let error):
                     print("Unable to get user image URL. Error: \(error). Try to authorize again")
-                    self?.errorAlertPresenter.presentAlert(message: "Не удалось войти в систему") {
+                    self?.errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
+                                                           message: "Не удалось войти в систему",
+                                                           buttonTitles: "Ок") {
                         self?.switchToAuthViewController()
                     }
                 }
@@ -168,6 +174,8 @@ extension SplashViewController: AuthViewControllerDelegate {
         }
     }
 }
+
+// MARK: - ProfileViewControllerDelegate
 
 extension SplashViewController: ProfileViewControllerDelegate {
     func profileViewControllerDidLogout() {

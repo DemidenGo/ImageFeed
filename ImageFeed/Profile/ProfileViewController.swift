@@ -14,6 +14,7 @@ final class ProfileViewController: UIViewController {
 
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
+    private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
     private var profileImageServiceObserver: NSObjectProtocol?
 
     private lazy var avatarImageView: UIImageView = {
@@ -77,7 +78,12 @@ final class ProfileViewController: UIViewController {
     }
 
     @objc private func logoutButtonAction() {
-        delegate?.profileViewControllerDidLogout()
+        errorAlertPresenter.presentAlert(title: "Пока, пока!",
+                                         message: "Уверены что хотите выйти?",
+                                         buttonTitles: "Да", "Нет",
+                                         buttonActions:
+                                            { [weak self] in
+                                                self?.delegate?.profileViewControllerDidLogout() }, {  })
     }
 
     private func updateProfileDetails(from profile: Profile?) {

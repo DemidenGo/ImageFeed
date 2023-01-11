@@ -46,9 +46,10 @@ final class ImagesListViewController: UIViewController {
                 preconditionFailure("Unable to get largeImageURLString from photos array")
             }
             let largeImageURL = URL(string: largeImageURLString)
-            viewController?.singleImageView.kf.indicatorType = .activity
+            ProgressHUD.show()
             viewController?.singleImageView.kf.setImage(with: largeImageURL, placeholder: largeImagePlaceholder) { _ in
                 viewController?.rescaleAndCenterImageInScrollView(image: viewController?.singleImageView.image)
+                ProgressHUD.dismiss()
             }
         } else {
             super.prepare(for: segue, sender: sender)
@@ -141,7 +142,7 @@ extension ImagesListViewController: UITableViewDelegate {
     }
 }
 
-// MARK: -
+// MARK: - ImagesListCellDelegate
 
 extension ImagesListViewController: ImagesListCellDelegate {
 
@@ -162,7 +163,9 @@ extension ImagesListViewController: ImagesListCellDelegate {
                 UIBlockingProgressHUD.dismiss()
                 print("ERROR: unable to change photos like", error)
                 let message = photo.isLiked ? "Не удалось снять лайк" : "Не удалось поставить лайк"
-                self?.errorAlertPresenter.presentAlert(message: message) {  }
+                self?.errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
+                                                       message: message,
+                                                       buttonTitles: "Ок") {  }
             }
         }
     }

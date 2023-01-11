@@ -8,7 +8,10 @@
 import UIKit
 
 protocol ErrorAlertPresenterProtocol {
-    func presentAlert(message: String, buttonAction: @escaping () -> Void)
+    func presentAlert(title: String,
+                      message: String,
+                      buttonTitles: String...,
+                      buttonActions: () -> Void...)
 }
 
 final class ErrorAlertPresenter: ErrorAlertPresenterProtocol {
@@ -18,15 +21,38 @@ final class ErrorAlertPresenter: ErrorAlertPresenterProtocol {
         self.viewController = viewController
     }
 
-    func presentAlert(message: String, buttonAction: @escaping () -> Void) {
-        let alert = UIAlertController(title: "Что-то пошло не так(",
+    /// Presents an alert controller modally. After tapping on any button, alert will be hidden
+    /// - Parameters:
+    ///   - title: The title of the alert
+    ///   - message: Descriptive text that provides additional details about the reason for the alert
+    ///   - buttonTitles: The text to use for the buttons title. Titles are separated by commas. At least one title is required. There may be two titles. If you want to use two buttons then second button title and second button action is required
+    ///   - buttonActions: A blocks to execute when the user selects the actions. Actions are separated by commas. At least one action is required. There may be two actions. If you want to use two buttons then second button title and second button action is required
+    func presentAlert(title: String,
+                      message: String,
+                      buttonTitles: String...,
+                      buttonActions: () -> Void...) {
+
+        let alert = UIAlertController(title: title,
                                       message: message,
                                       preferredStyle: .alert)
-        let action = UIAlertAction(title: "Ок", style: .default) { _ in
-            alert.dismiss(animated: true)
-            buttonAction()
+
+        guard let firstButtonTitle = buttonTitles[safe: 0], let firstButtonAction = buttonActions[safe: 0] else {
+            preconditionFailure("Unable to get first button title or action in ErrorAlertPresenter")
         }
-        alert.addAction(action)
+        let firstAction = UIAlertAction(title: firstButtonTitle, style: .default) { _ in
+            alert.dismiss(animated: true)
+            firstButtonAction()
+        }
+        alert.addAction(firstAction)
+
+        if let secondButtonTitle = buttonTitles[safe: 1], let secondButtonAction = buttonActions[safe: 1] {
+            let secondAction = UIAlertAction(title: secondButtonTitle, style: .default) { _ in
+                alert.dismiss(animated: true)
+                secondButtonAction()
+            }
+            alert.addAction(secondAction)
+        }
+
         viewController?.present(alert, animated: true)
     }
 }
