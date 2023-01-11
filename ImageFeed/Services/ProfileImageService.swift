@@ -28,7 +28,15 @@ final class ProfileImageService: ProfileImageServiceProtocol {
         if lastUsername == username { return }
         task?.cancel()
         lastUsername = username
-        let request = makeURLRequest()
+        guard let username = profileService.profile?.username else {
+            preconditionFailure("Unable to get username")
+        }
+        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+                                                pathComponent: "users/\(username)",
+                                                queryItems: nil,
+                                                requestHttpMethod: "GET",
+                                                addValue: "Authorization: Bearer \(tokenStorage.token)",
+                                                forHTTPHeaderField: "Authorization")
         let task = session.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
             switch result {
             case .success(let jsonResponse):
@@ -43,17 +51,5 @@ final class ProfileImageService: ProfileImageServiceProtocol {
         }
         self.task = task
         task.resume()
-    }
-
-    private func makeURLRequest() -> URLRequest {
-        let baseURL = defaultBaseURL
-        guard let username = profileService.profile?.username else {
-            preconditionFailure("Unable to get username")
-        }
-        let publicProfileURL = baseURL.appendingPathComponent("users/\(username)")
-        var request = URLRequest(url: publicProfileURL)
-        request.httpMethod = "GET"
-        request.addValue("Authorization: Bearer \(tokenStorage.token)", forHTTPHeaderField: "Authorization")
-        return request
     }
 }

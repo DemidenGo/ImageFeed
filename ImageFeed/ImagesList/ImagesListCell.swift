@@ -10,6 +10,14 @@ import Kingfisher
 
 final class ImagesListCell: UITableViewCell {
 
+    weak var delegate: ImagesListCellDelegate?
+
+    private lazy var likeActiveImage = UIImage(named: "LikeActive")
+    private lazy var likeNoActiveImage = UIImage(named: "LikeNoActive")
+    private var currentLikeButtonImage: UIImage {
+        likeButton.image(for: .normal) ?? UIImage()
+    }
+
     private lazy var backgroundCellView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -40,7 +48,7 @@ final class ImagesListCell: UITableViewCell {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "LikeNoActive"), for: .normal)
-        button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
+        button.addTarget(self, action: #selector(likeButtonAction), for: .touchUpInside)
         return button
     }()
 
@@ -71,12 +79,13 @@ final class ImagesListCell: UITableViewCell {
         photoImageView.kf.cancelDownloadTask()
     }
 
-    @objc private func buttonAction() {
-        if likeButton.image(for: .normal) == UIImage(named: "LikeNoActive") {
-            likeButton.setImage(UIImage(named: "LikeActive"), for: .normal)
-        } else {
-            likeButton.setImage(UIImage(named: "LikeNoActive"), for: .normal)
-        }
+    func setIsLiked() {
+        currentLikeButtonImage == likeNoActiveImage ? likeButton.setImage(likeActiveImage, for: .normal) :
+        likeButton.setImage(likeNoActiveImage, for: .normal)
+    }
+
+    @objc private func likeButtonAction() {
+        delegate?.imagesListCellDidTapLike(self)
     }
 
     private func setupConstraints() {

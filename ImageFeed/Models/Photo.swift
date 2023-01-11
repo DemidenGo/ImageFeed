@@ -14,7 +14,11 @@ struct Photo {
     let description: String?
     let thumbImageURL: String
     let largeImageURL: String
-    let isLiked: Bool
+    var isLiked: Bool
+}
+
+struct ResponseToLike: Decodable {
+    
 }
 
 struct PhotoResult: Decodable {

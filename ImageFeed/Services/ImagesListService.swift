@@ -9,9 +9,9 @@ import UIKit
 import AVFoundation
 
 protocol ImagesListServiceProtocol {
-    var lastLoadedPage: UInt { get }
     var photos: [Photo] { get }
     func fetchNextPageOfPhotos()
+    func changeLike(photoID: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void)
 }
 
 final class ImagesListService: ImagesListServiceProtocol {
@@ -25,9 +25,41 @@ final class ImagesListService: ImagesListServiceProtocol {
     private var nextPage: UInt { lastLoadedPage + 1 }
     private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
 
+    func changeLike(photoID: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+                                                pathComponent: "/photos/\(photoID)/like",
+                                                queryItems: nil,
+                                                requestHttpMethod: isLike ? "POST" : "DELETE",
+                                                addValue: "Authorization: Bearer \(tokenStorage.token)",
+                                                forHTTPHeaderField: "Authorization")
+        let task = session.objectTask(for: request) { [weak self] (result: Result<ResponseToLike, Error>) in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(_):
+                    guard let self = self,
+                          let index = self.photos.firstIndex(where: { $0.id == photoID }),
+                          self.photos.indices ~= index else {
+                        preconditionFailure("Unable to get correct index for liked photo")
+                    }
+                    self.photos[index].isLiked.toggle()
+                    completion(.success(()))
+                case .failure(let error):
+                    print("ERROR: likes changing  failure", error)
+                    completion(.failure(error))
+                }
+            }
+        }
+        task.resume()
+    }
+
     func fetchNextPageOfPhotos() {
         guard task == nil else { return }
-        let request = makeURLRequest()
+        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+                                                pathComponent: "photos",
+                                                queryItems: [URLQueryItem(name: "page", value: String(nextPage))],
+                                                requestHttpMethod: "GET",
+                                                addValue: "Authorization: Bearer \(tokenStorage.token)",
+                                                forHTTPHeaderField: "Authorization")
         let task = session.objectTask(for: request) { [weak self] (result: Result<[PhotoResult], Error>) in
             DispatchQueue.main.async {
                 switch result {
@@ -54,22 +86,5 @@ final class ImagesListService: ImagesListServiceProtocol {
         }
         self.task = task
         task.resume()
-    }
-
-    private func makeURLRequest() -> URLRequest {
-        let baseURL = defaultBaseURL
-        let imagesListURL = baseURL.appendingPathComponent("photos")
-        guard let components = URLComponents(url: imagesListURL, resolvingAgainstBaseURL: false) else {
-            preconditionFailure("Unable to construct imagesListURLComponents")
-        }
-        var imagesListURLComponents = components
-        imagesListURLComponents.queryItems = [URLQueryItem(name: "page", value: String(nextPage))]
-        guard let url = imagesListURLComponents.url else {
-            preconditionFailure("Unable to construct imagesListURL")
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Authorization: Bearer \(tokenStorage.token)", forHTTPHeaderField: "Authorization")
-        return request
     }
 }

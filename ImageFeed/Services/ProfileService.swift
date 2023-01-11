@@ -26,7 +26,12 @@ final class ProfileService: ProfileServiceProtocol {
         if lastToken == tokenStorage.token { return }
         task?.cancel()
         lastToken = tokenStorage.token
-        let request = makeURLRequest()
+        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+                                                pathComponent: "me",
+                                                queryItems: nil,
+                                                requestHttpMethod: "GET",
+                                                addValue: "Authorization: Bearer \(tokenStorage.token)",
+                                                forHTTPHeaderField: "Authorization")
         let task = session.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             switch result {
             case .success(let jsonResponse):
@@ -45,14 +50,5 @@ final class ProfileService: ProfileServiceProtocol {
         }
         self.task = task
         task.resume()
-    }
-
-    private func makeURLRequest() -> URLRequest {
-        let baseURL = defaultBaseURL
-        let profileURL = baseURL.appendingPathComponent("me")
-        var request = URLRequest(url: profileURL)
-        request.httpMethod = "GET"
-        request.addValue("Authorization: Bearer \(tokenStorage.token)", forHTTPHeaderField: "Authorization")
-        return request
     }
 }

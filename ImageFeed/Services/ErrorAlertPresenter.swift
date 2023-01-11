@@ -8,7 +8,7 @@
 import UIKit
 
 protocol ErrorAlertPresenterProtocol {
-    func presentAlert(buttonAction: @escaping () -> Void)
+    func presentAlert(message: String, buttonAction: @escaping () -> Void)
 }
 
 final class ErrorAlertPresenter: ErrorAlertPresenterProtocol {
@@ -18,9 +18,9 @@ final class ErrorAlertPresenter: ErrorAlertPresenterProtocol {
         self.viewController = viewController
     }
 
-    func presentAlert(buttonAction: @escaping () -> Void) {
+    func presentAlert(message: String, buttonAction: @escaping () -> Void) {
         let alert = UIAlertController(title: "Что-то пошло не так(",
-                                      message: "Не удалось войти в систему",
+                                      message: message,
                                       preferredStyle: .alert)
         let action = UIAlertAction(title: "Ок", style: .default) { _ in
             alert.dismiss(animated: true)
