@@ -15,8 +15,12 @@ extension URLRequest {
                                requestHttpMethod method: String,
                                addValue value: String?,
                                forHTTPHeaderField headerField: String?) -> URLRequest {
-
-        var fullURL = component != nil ? url.appendingPathComponent(component!) : url
+        var fullURL: URL
+        if let component = component {
+            fullURL = url.appendingPathComponent(component)
+        } else {
+            fullURL = url
+        }
         lazy var urlComponents = URLComponents()
         if let items = items,
            let valueComponents = URLComponents(url: fullURL, resolvingAgainstBaseURL: false) {

@@ -35,11 +35,7 @@ final class ProfileService: ProfileServiceProtocol {
         let task = session.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             switch result {
             case .success(let jsonResponse):
-                let profileResult = jsonResponse
-                let profile = Profile(username: profileResult.username,
-                                      name: profileResult.firstName + " " + profileResult.lastName,
-                                      loginName: "@" + profileResult.username,
-                                      bio: profileResult.bio)
+                let profile = jsonResponse.convertToViewModel()
                 self?.profile = profile
                 completion(.success(profile))
                 self?.task = nil

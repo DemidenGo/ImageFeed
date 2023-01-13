@@ -21,6 +21,7 @@ final class ImagesListService: ImagesListServiceProtocol {
 
     private var task: URLSessionTask?
     private(set) lazy var photos = [Photo]()
+    // Как я понял, пагинация у unsplash начинается с единицы. Если я сделаю пагинацию с нуля, то получу две одинаковые первые страницы. То есть на запрос с page = 0 unsplash мне выдаст первую страницу и на запрос с page = 1 unsplash мне выдаст такую же первую страницу. Получится, что два первых запроса вернут одинаковый результат
     private(set) lazy var lastLoadedPage: UInt = 0
     private var nextPage: UInt { lastLoadedPage + 1 }
     private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
@@ -41,7 +42,7 @@ final class ImagesListService: ImagesListServiceProtocol {
                           self.photos.indices ~= index else {
                         preconditionFailure("Unable to get correct index for liked photo")
                     }
-                    self.photos[index].isLiked.toggle()
+                    self.photos[index].isLiked = isLike
                     completion(.success(()))
                 case .failure(let error):
                     print("ERROR: likes changing  failure", error)
@@ -64,17 +65,8 @@ final class ImagesListService: ImagesListServiceProtocol {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let jsonResponse):
-                    for photoResult in jsonResponse {
-                        let photo = Photo(id: photoResult.id,
-                                          size: CGSize(width: Double(photoResult.width),
-                                                       height: Double(photoResult.height)),
-                                          createdAt: photoResult.createdAt,
-                                          description: photoResult.description,
-                                          thumbImageURL: photoResult.urls.thumb,
-                                          largeImageURL: photoResult.urls.full,
-                                          isLiked: photoResult.likedByUser)
-                        self?.photos.append(photo)
-                    }
+                    let newPhotos = jsonResponse.map { $0.convertToViewModel() }
+                    self?.photos.append(contentsOf: newPhotos)
                     NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: self)
                     self?.task = nil
                     self?.lastLoadedPage += 1

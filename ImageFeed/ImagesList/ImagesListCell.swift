@@ -12,11 +12,8 @@ final class ImagesListCell: UITableViewCell {
 
     weak var delegate: ImagesListCellDelegate?
 
-    private lazy var likeActiveImage = UIImage(named: "LikeActive")
-    private lazy var likeNoActiveImage = UIImage(named: "LikeNoActive")
-    private var currentLikeButtonImage: UIImage {
-        likeButton.image(for: .normal) ?? UIImage()
-    }
+    lazy var likeActiveImage = UIImage(named: "LikeActive")
+    lazy var likeNoActiveImage = UIImage(named: "LikeNoActive")
 
     private lazy var backgroundCellView: UIView = {
         let view = UIView()
@@ -77,11 +74,14 @@ final class ImagesListCell: UITableViewCell {
         super.prepareForReuse()
         // Отменяем загрузку, чтобы избежать багов при переиспользовании ячеек
         photoImageView.kf.cancelDownloadTask()
+        // Сбрасываем предыдущий стейт ячейки
+        photoImageView.image = nil
+        dateLabel.text = nil
+        likeButton.setImage(likeNoActiveImage, for: .normal)
     }
 
-    func setIsLiked() {
-        currentLikeButtonImage == likeNoActiveImage ? likeButton.setImage(likeActiveImage, for: .normal) :
-        likeButton.setImage(likeNoActiveImage, for: .normal)
+    func setIsLiked(_ isLiked: Bool) {
+        isLiked ? likeButton.setImage(likeActiveImage, for: .normal) : likeButton.setImage(likeNoActiveImage, for: .normal)
     }
 
     @objc private func likeButtonAction() {

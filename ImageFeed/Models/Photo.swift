@@ -35,3 +35,15 @@ struct UrlsResult: Decodable {
     let thumb: String
     let full: String
 }
+
+extension PhotoResult {
+    func convertToViewModel() -> Photo {
+        Photo(id: self.id,
+              size: CGSize(width: Double(self.width), height: Double(self.height)),
+              createdAt: self.createdAt,
+              description: self.description,
+              thumbImageURL: self.urls.thumb,
+              largeImageURL: self.urls.full,
+              isLiked: self.likedByUser)
+    }
+}

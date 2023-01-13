@@ -10,6 +10,7 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
 
+    // Держим сильную ссылку на SplashViewController, т.к. у него свмого нет сильной ссылки на ProfileViewController. Если сделать ссылку слабой, то делегат будет деинититься ещё до обращения к нему и, соответственно, функцию свою выполнять не будет
     var delegate: ProfileViewControllerDelegate?
 
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared

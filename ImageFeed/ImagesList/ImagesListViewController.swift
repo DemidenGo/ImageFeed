@@ -22,13 +22,6 @@ final class ImagesListViewController: UIViewController {
     private lazy var photoNames = Array(0...19).map { "\($0)" }
     private lazy var photos = [Photo]()
 
-    private lazy var dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .none
-        return formatter
-    }()
-
     @IBOutlet private var tableView: UITableView!
 
     override func viewDidLoad() {
@@ -87,7 +80,7 @@ final class ImagesListViewController: UIViewController {
     }
 
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let loadedPhoto = imagesListService.photos[safe: indexPath.row],
+        guard let loadedPhoto = photos[safe: indexPath.row],
               let url = URL(string: loadedPhoto.thumbImageURL),
               let placeholderImageHeight = thumbImagePlaceholder?.size.height else {
             print("Error: unable to get thumb photo URL from photos array")
@@ -101,6 +94,13 @@ final class ImagesListViewController: UIViewController {
                 self.tableView.reloadRows(at: [indexPath], with: .automatic)
             }
         }
+        cell.likeButton.setImage(
+            loadedPhoto.isLiked ? cell.likeActiveImage : cell.likeNoActiveImage, for: .normal)
+        guard let date = unsplashDateFormatter.date(from: loadedPhoto.createdAt) else {
+            preconditionFailure("Unable to get date from createdAt string")
+        }
+        let feedDateString = date.dateString
+        cell.dateLabel.text = feedDateString
     }
 }
 
@@ -152,12 +152,12 @@ extension ImagesListViewController: ImagesListCellDelegate {
             preconditionFailure("Unable to found cell with clicked likeButton")
         }
         UIBlockingProgressHUD.show()
-        imagesListService.changeLike(photoID: photo.id, isLike: photo.isLiked) { [weak self] result in
+        imagesListService.changeLike(photoID: photo.id, isLike: !photo.isLiked) { [weak self] result in
             switch result {
             case .success(_):
                 guard let self = self else { return }
                 self.photos = self.imagesListService.photos
-                cell.setIsLiked()
+                cell.setIsLiked(self.photos[indexPath.row].isLiked)
                 UIBlockingProgressHUD.dismiss()
             case .failure(let error):
                 UIBlockingProgressHUD.dismiss()
