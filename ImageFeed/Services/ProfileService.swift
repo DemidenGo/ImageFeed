@@ -16,7 +16,7 @@ final class ProfileService: ProfileServiceProtocol {
 
     static let shared = ProfileService()
 
-    private lazy var tokenStorage: OAuth2TokenStorageProtocol = OAuth2TokenStorage.shared
+    private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
     private var task: URLSessionTask?
     private var lastToken: String?
     private(set) var profile: Profile?
@@ -26,15 +26,16 @@ final class ProfileService: ProfileServiceProtocol {
         if lastToken == tokenStorage.token { return }
         task?.cancel()
         lastToken = tokenStorage.token
-        let request = makeURLRequest()
+        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+                                                pathComponent: "me",
+                                                queryItems: nil,
+                                                requestHttpMethod: "GET",
+                                                addValue: "Authorization: Bearer \(tokenStorage.token)",
+                                                forHTTPHeaderField: "Authorization")
         let task = session.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             switch result {
             case .success(let jsonResponse):
-                let profileResult = jsonResponse
-                let profile = Profile(username: profileResult.username,
-                                      name: profileResult.firstName + " " + profileResult.lastName,
-                                      loginName: "@" + profileResult.username,
-                                      bio: profileResult.bio)
+                let profile = jsonResponse.convertToViewModel()
                 self?.profile = profile
                 completion(.success(profile))
                 self?.task = nil
@@ -45,14 +46,5 @@ final class ProfileService: ProfileServiceProtocol {
         }
         self.task = task
         task.resume()
-    }
-
-    private func makeURLRequest() -> URLRequest {
-        let baseURL = defaultBaseURL
-        let profileURL = baseURL.appendingPathComponent("me")
-        var request = URLRequest(url: profileURL)
-        request.httpMethod = "GET"
-        request.addValue("Authorization: Bearer \(tokenStorage.token)", forHTTPHeaderField: "Authorization")
-        return request
     }
 }

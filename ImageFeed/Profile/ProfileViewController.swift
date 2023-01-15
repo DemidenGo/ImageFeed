@@ -12,7 +12,16 @@ final class ProfileViewController: UIViewController {
 
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
+    private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
+    private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
     private var profileImageServiceObserver: NSObjectProtocol?
+
+    private var window: UIWindow {
+        guard let window = UIApplication.shared.windows.first else {
+            fatalError("Invalid Configuration: unable to get window from UIApplication")
+        }
+        return window
+    }
 
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
@@ -30,6 +39,7 @@ final class ProfileViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "Exit"), for: .normal)
         button.tintColor = .ypRed
+        button.addTarget(self, action: #selector(logoutButtonAction), for: .touchUpInside)
         return button
     }()
 
@@ -73,6 +83,18 @@ final class ProfileViewController: UIViewController {
         updateAvatar()
     }
 
+    @objc private func logoutButtonAction() {
+        errorAlertPresenter.presentAlert(title: "Пока, пока!",
+                                         message: "Уверены что хотите выйти?",
+                                         buttonTitles: "Да", "Нет",
+                                         buttonActions:
+                                            { [weak self] in
+                                                self?.tokenStorage.setTokenValue(newValue: "")
+                                                WebViewViewController.clean()
+                                                self?.window.rootViewController = SplashViewController()
+                                                self?.window.makeKeyAndVisible() }, {  })
+    }
+
     private func updateProfileDetails(from profile: Profile?) {
         guard let profile = profile else { preconditionFailure("Unable to get user profile") }
         nameLabel.text = profile.name
@@ -99,7 +121,7 @@ final class ProfileViewController: UIViewController {
         cache.clearCache()
         avatarImageView.kf.indicatorType = .activity
         avatarImageView.kf.setImage(with: url,
-                                    placeholder: UIImage(named: "AvatarPlaceholder.png")) { [weak self] result in
+                                    placeholder: avatarPlaceholder) { [weak self] result in
             switch result {
             case .success(let value):
                 self?.avatarImageView.image = value.image

@@ -6,8 +6,14 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ImagesListCell: UITableViewCell {
+
+    weak var delegate: ImagesListCellDelegate?
+
+    private lazy var likeActiveImage = UIImage(named: "LikeActive")
+    private lazy var likeNoActiveImage = UIImage(named: "LikeNoActive")
 
     private lazy var backgroundCellView: UIView = {
         let view = UIView()
@@ -18,7 +24,7 @@ final class ImagesListCell: UITableViewCell {
         return view
     }()
 
-    lazy var photoImageView: UIImageView = {
+    private lazy var photoImageView: UIImageView = {
         let view = UIImageView()
         view.image = UIImage(named: "0")
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -26,7 +32,7 @@ final class ImagesListCell: UITableViewCell {
         return view
     }()
 
-    lazy var dateLabel: UILabel = {
+    private lazy var dateLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "9 ноября 2022"
@@ -35,11 +41,11 @@ final class ImagesListCell: UITableViewCell {
         return label
     }()
 
-    lazy var likeButton: UIButton = {
+    private lazy var likeButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "LikeNoActive"), for: .normal)
-        button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
+        button.addTarget(self, action: #selector(likeButtonAction), for: .touchUpInside)
         return button
     }()
 
@@ -64,12 +70,32 @@ final class ImagesListCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    @objc private func buttonAction() {
-        if likeButton.image(for: .normal) == UIImage(named: "LikeNoActive") {
-            likeButton.setImage(UIImage(named: "LikeActive"), for: .normal)
-        } else {
-            likeButton.setImage(UIImage(named: "LikeNoActive"), for: .normal)
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        // Отменяем загрузку, чтобы избежать багов при переиспользовании ячеек
+        photoImageView.kf.cancelDownloadTask()
+        // Сбрасываем предыдущий стейт ячейки
+        photoImageView.image = nil
+        dateLabel.text = nil
+        likeButton.setImage(likeNoActiveImage, for: .normal)
+    }
+
+    func setIsLiked(_ isLiked: Bool) {
+        likeButton.setImage(isLiked ? likeActiveImage : likeNoActiveImage, for: .normal)
+    }
+
+    func configure(with viewModel: CellViewModel, _ completion: @escaping  () -> Void) {
+        photoImageView.kf.indicatorType = .activity
+        photoImageView.kf.setImage(with: viewModel.thumbImageURL,
+                                   placeholder: thumbImagePlaceholder) { _ in
+            completion()
         }
+        setIsLiked(viewModel.isLiked)
+        dateLabel.text = viewModel.createdAt
+    }
+
+    @objc private func likeButtonAction() {
+        delegate?.imagesListCellDidTapLike(self)
     }
 
     private func setupConstraints() {

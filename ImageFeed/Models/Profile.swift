@@ -42,3 +42,12 @@ struct Links: Decodable {
     let likes: String
     let portfolio: String
 }
+
+extension ProfileResult {
+    func convertToViewModel() -> Profile {
+        Profile(username: self.username,
+                name: self.firstName + " " + self.lastName,
+                loginName: "@" + self.username,
+                bio: self.bio)
+    }
+}
