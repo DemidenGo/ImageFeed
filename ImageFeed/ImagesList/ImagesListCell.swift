@@ -12,8 +12,8 @@ final class ImagesListCell: UITableViewCell {
 
     weak var delegate: ImagesListCellDelegate?
 
-    lazy var likeActiveImage = UIImage(named: "LikeActive")
-    lazy var likeNoActiveImage = UIImage(named: "LikeNoActive")
+    private lazy var likeActiveImage = UIImage(named: "LikeActive")
+    private lazy var likeNoActiveImage = UIImage(named: "LikeNoActive")
 
     private lazy var backgroundCellView: UIView = {
         let view = UIView()
@@ -24,7 +24,7 @@ final class ImagesListCell: UITableViewCell {
         return view
     }()
 
-    lazy var photoImageView: UIImageView = {
+    private lazy var photoImageView: UIImageView = {
         let view = UIImageView()
         view.image = UIImage(named: "0")
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -32,7 +32,7 @@ final class ImagesListCell: UITableViewCell {
         return view
     }()
 
-    lazy var dateLabel: UILabel = {
+    private lazy var dateLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "9 ноября 2022"
@@ -41,7 +41,7 @@ final class ImagesListCell: UITableViewCell {
         return label
     }()
 
-    lazy var likeButton: UIButton = {
+    private lazy var likeButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "LikeNoActive"), for: .normal)
@@ -81,7 +81,17 @@ final class ImagesListCell: UITableViewCell {
     }
 
     func setIsLiked(_ isLiked: Bool) {
-        isLiked ? likeButton.setImage(likeActiveImage, for: .normal) : likeButton.setImage(likeNoActiveImage, for: .normal)
+        likeButton.setImage(isLiked ? likeActiveImage : likeNoActiveImage, for: .normal)
+    }
+
+    func configure(with viewModel: CellViewModel, _ completion: @escaping  () -> Void) {
+        photoImageView.kf.indicatorType = .activity
+        photoImageView.kf.setImage(with: viewModel.thumbImageURL,
+                                   placeholder: thumbImagePlaceholder) { _ in
+            completion()
+        }
+        setIsLiked(viewModel.isLiked)
+        dateLabel.text = viewModel.createdAt
     }
 
     @objc private func likeButtonAction() {

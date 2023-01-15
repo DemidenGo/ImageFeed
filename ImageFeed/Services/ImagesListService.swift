@@ -21,7 +21,6 @@ final class ImagesListService: ImagesListServiceProtocol {
 
     private var task: URLSessionTask?
     private(set) lazy var photos = [Photo]()
-    // Как я понял, пагинация у unsplash начинается с единицы. Если я сделаю пагинацию с нуля, то получу две одинаковые первые страницы. То есть на запрос с page = 0 unsplash мне выдаст первую страницу и на запрос с page = 1 unsplash мне выдаст такую же первую страницу. Получится, что два первых запроса вернут одинаковый результат
     private(set) lazy var lastLoadedPage: UInt = 0
     private var nextPage: UInt { lastLoadedPage + 1 }
     private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared

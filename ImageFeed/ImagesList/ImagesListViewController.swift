@@ -14,12 +14,8 @@ final class ImagesListViewController: UIViewController {
 
     private var imagesListServiceObserver: NSObjectProtocol?
     private lazy var imagesListService: ImagesListServiceProtocol = ImagesListService.shared
-    private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
-
-    private lazy var thumbImagePlaceholder = UIImage(named: "PlaceholderImageForFeed.png")
-    private lazy var largeImagePlaceholder = UIImage(named: "LargeImagePlaceholder.png")
+    private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)    
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
-    private lazy var photoNames = Array(0...19).map { "\($0)" }
     private lazy var photos = [Photo]()
 
     @IBOutlet private var tableView: UITableView!
@@ -80,27 +76,16 @@ final class ImagesListViewController: UIViewController {
     }
 
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let loadedPhoto = photos[safe: indexPath.row],
-              let url = URL(string: loadedPhoto.thumbImageURL),
-              let placeholderImageHeight = thumbImagePlaceholder?.size.height else {
-            print("Error: unable to get thumb photo URL from photos array")
-            imagesListService.fetchNextPageOfPhotos()
-            return
+        guard let loadedPhoto = photos[safe: indexPath.row] else {
+            preconditionFailure("ERROR: unable to get photo from photos array using cell indexPath")
         }
         let loadedPhotoHeight = loadedPhoto.size.height
-        cell.photoImageView.kf.indicatorType = .activity
-        cell.photoImageView.kf.setImage(with: url, placeholder: thumbImagePlaceholder) { _ in
-            if loadedPhotoHeight != placeholderImageHeight {
-                self.tableView.reloadRows(at: [indexPath], with: .automatic)
+        let cellViewModel = loadedPhoto.convertToCellViewModel()
+        cell.configure(with: cellViewModel) { [weak self] in
+            if loadedPhotoHeight != thumbImagePlaceholderHeight {
+                self?.tableView.reloadRows(at: [indexPath], with: .automatic)
             }
         }
-        cell.likeButton.setImage(
-            loadedPhoto.isLiked ? cell.likeActiveImage : cell.likeNoActiveImage, for: .normal)
-        guard let date = unsplashDateFormatter.date(from: loadedPhoto.createdAt) else {
-            preconditionFailure("Unable to get date from createdAt string")
-        }
-        let feedDateString = date.dateString
-        cell.dateLabel.text = feedDateString
     }
 }
 

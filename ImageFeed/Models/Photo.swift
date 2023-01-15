@@ -47,3 +47,17 @@ extension PhotoResult {
               isLiked: self.likedByUser)
     }
 }
+
+extension Photo {
+    func convertToCellViewModel() -> CellViewModel {
+        guard let url = URL(string: self.thumbImageURL) else {
+            preconditionFailure("ERROR: unable to get URL from thumbImageURL string")
+        }
+        guard let date = unsplashDateFormatter.date(from: self.createdAt) else {
+            preconditionFailure("ERROR: unable to get date from createdAt string")
+        }
+        return CellViewModel(thumbImageURL: url,
+                      createdAt: date.dateString,
+                      isLiked: self.isLiked)
+    }
+}
