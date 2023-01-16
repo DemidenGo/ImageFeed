@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import AVFoundation
 
 protocol ImagesListServiceProtocol {
     var photos: [Photo] { get }

@@ -79,10 +79,9 @@ final class ImagesListViewController: UIViewController {
         guard let loadedPhoto = photos[safe: indexPath.row] else {
             preconditionFailure("ERROR: unable to get photo from photos array using cell indexPath")
         }
-        let loadedPhotoHeight = loadedPhoto.size.height
         let cellViewModel = loadedPhoto.convertToCellViewModel()
         cell.configure(with: cellViewModel) { [weak self] in
-            if loadedPhotoHeight != thumbImagePlaceholderHeight {
+            if loadedPhoto.size != thumbImagePlaceholderSize {
                 self?.tableView.reloadRows(at: [indexPath], with: .automatic)
             }
         }

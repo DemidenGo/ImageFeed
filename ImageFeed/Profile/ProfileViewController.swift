@@ -27,10 +27,11 @@ final class ProfileViewController: UIViewController {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.backgroundColor = .ypBlack
-        imageView.image = UIImage(named: "avatar.png")
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 35
         imageView.layer.masksToBounds = true
+        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(size: CGSize(width: 70, height: 70))
+        imageView.layer.addSublayer(gradient)
         return imageView
     }()
 
@@ -48,27 +49,30 @@ final class ProfileViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 1
         label.adjustsFontSizeToFitWidth = true
-        label.text = "Юрий Демиденко"
         label.font = UIFont(name: "YSDisplay-Bold", size: 23)
         label.textColor = .ypWhite
+        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(size: CGSize(width: 223, height: 20))
+        label.layer.addSublayer(gradient)
         return label
     }()
 
     lazy var nicknameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "@demidengo"
         label.font = UIFont(name: "YSDisplay-Regular", size: 13)
         label.textColor = .ypGray
+        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(size: CGSize(width: 89, height: 18))
+        label.layer.addSublayer(gradient)
         return label
     }()
 
     lazy var statusLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Hello, world!"
         label.font = UIFont(name: "YSDisplay-Regular", size: 13)
         label.textColor = .ypWhite
+        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(size: CGSize(width: 67, height: 18))
+        label.layer.addSublayer(gradient)
         return label
     }()
 
@@ -97,6 +101,7 @@ final class ProfileViewController: UIViewController {
 
     private func updateProfileDetails(from profile: Profile?) {
         guard let profile = profile else { preconditionFailure("Unable to get user profile") }
+        removeGradientLayers(from: [nameLabel, nicknameLabel, statusLabel])
         nameLabel.text = profile.name
         nicknameLabel.text = profile.loginName
         statusLabel.text = profile.bio
@@ -119,17 +124,22 @@ final class ProfileViewController: UIViewController {
         else { return }
         let cache = ImageCache.default
         cache.clearCache()
-        avatarImageView.kf.indicatorType = .activity
         avatarImageView.kf.setImage(with: url,
                                     placeholder: avatarPlaceholder) { [weak self] result in
+            guard let self = self else { return }
             switch result {
             case .success(let value):
-                self?.avatarImageView.image = value.image
+                self.removeGradientLayers(from: [self.avatarImageView])
+                self.avatarImageView.image = value.image
             case .failure(let error):
                 print("ERROR update avatar: ", error.errorCode, " ", error.localizedDescription)
-                self?.updateAvatar()
+                self.updateAvatar()
             }
         }
+    }
+
+    private func removeGradientLayers(from views: [UIView]) {
+        views.forEach { $0.layer.sublayers?.removeAll() }
     }
 
     private func setupConstraints() {
