@@ -26,7 +26,7 @@ final class ProfileService: ProfileServiceProtocol {
         if lastToken == tokenStorage.token { return }
         task?.cancel()
         lastToken = tokenStorage.token
-        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+        let request = URLRequest.makeURLRequest(baseURL: Constants.defaultBaseURL,
                                                 pathComponent: "me",
                                                 queryItems: nil,
                                                 requestHttpMethod: "GET",

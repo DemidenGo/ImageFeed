@@ -25,12 +25,12 @@ final class OAuth2Service: AuthServiceProtocol {
         if lastCode == code { return }
         task?.cancel()
         lastCode = code
-        let request = URLRequest.makeURLRequest(baseURL: unsplashTokenURL,
+        let request = URLRequest.makeURLRequest(baseURL: Constants.unsplashTokenURL,
                                                 pathComponent: nil,
                                                 queryItems: [
-                                                    URLQueryItem(name: "client_id", value: accessKey),
-                                                    URLQueryItem(name: "client_secret", value: secretKey),
-                                                    URLQueryItem(name: "redirect_uri", value: redirectURI),
+                                                    URLQueryItem(name: "client_id", value: Constants.accessKey),
+                                                    URLQueryItem(name: "client_secret", value: Constants.secretKey),
+                                                    URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
                                                     URLQueryItem(name: "code", value: code),
                                                     URLQueryItem(name: "grant_type", value: "authorization_code")
                                                 ],

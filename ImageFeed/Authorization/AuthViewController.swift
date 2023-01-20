@@ -50,10 +50,14 @@ final class AuthViewController: UIViewController {
     }
 
     func presentWebViewViewController() {
+        let authHelper = AuthHelper()
         let webViewViewController = WebViewViewController()
+        let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+        webViewViewController.delegate = self
+        webViewViewController.presenter = webViewPresenter
+        webViewPresenter.view = webViewViewController
         webViewViewController.modalPresentationStyle = .fullScreen
         present(webViewViewController, animated: true)
-        webViewViewController.delegate = self
     }
 
     private func setupConstraints() {
