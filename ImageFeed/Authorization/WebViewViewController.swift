@@ -71,7 +71,7 @@ final class WebViewViewController: UIViewController {
     }
 
     private func configWebView() {
-        presenter?.loadURLRequest()
+        presenter?.viewDidLoad()
         webView.navigationDelegate = self
     }
 

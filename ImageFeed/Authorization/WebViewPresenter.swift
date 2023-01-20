@@ -9,7 +9,7 @@ import UIKit
 
 public protocol WebViewPresenterProtocol {
     var view: WebViewViewControllerProtocol? { get set }
-    func loadURLRequest()
+    func viewDidLoad()
     func didUpdateProgressValue(_ newValue: Double)
     func code(from url: URL) -> String?
 }
@@ -23,7 +23,7 @@ final class WebViewPresenter: WebViewPresenterProtocol {
         self.authHelper = authHelper
     }
 
-    func loadURLRequest() {
+    func viewDidLoad() {
         let request = authHelper.authRequest()
         view?.load(request: request)
     }
@@ -39,7 +39,7 @@ final class WebViewPresenter: WebViewPresenterProtocol {
         authHelper.code(from: url)
     }
 
-    private func shouldHideProgress(for value: Float) -> Bool {
+    func shouldHideProgress(for value: Float) -> Bool {
         (1 - value) <= 0.0001
     }
 }

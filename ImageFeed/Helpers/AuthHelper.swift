@@ -38,7 +38,7 @@ final class AuthHelper: AuthHelperProtocol {
         }
     }
 
-    private func authURL() -> URL {
+    func authURL() -> URL {
         guard let components = URLComponents(string: configuration.authURLString) else {
             preconditionFailure("Unable to construct unsplashAuthorizeURLComponents")
         }
