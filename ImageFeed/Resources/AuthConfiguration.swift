@@ -28,8 +28,6 @@ enum Constants {
     }
 }
 
-let session = URLSession.shared
-
 struct AuthConfiguration {
     let accessKey: String
     let secretKey: String

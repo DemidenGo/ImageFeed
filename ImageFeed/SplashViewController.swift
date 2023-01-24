@@ -18,13 +18,6 @@ final class SplashViewController: UIViewController {
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
 
-    private var window: UIWindow {
-        guard let window = UIApplication.shared.windows.first else {
-            fatalError("Invalid Configuration: unable to get window from UIApplication")
-        }
-        return window
-    }
-
     private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -74,8 +67,14 @@ final class SplashViewController: UIViewController {
 
     private func switchToTabBarController() {
         guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController else {
-            preconditionFailure("Unable to get TabBarController from Storyboard")
+            preconditionFailure("Unable to get tabBarController from Storyboard")
         }
+        guard let profileViewController = tabBarController.viewControllers?[1] as? ProfileViewController else {
+            preconditionFailure("Unable to get profileViewController from tabBarController")
+        }
+        let profilePresenter = ProfilePresenter()
+        profileViewController.presenter = profilePresenter
+        profilePresenter.view = profileViewController
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
     }

@@ -8,20 +8,18 @@
 import UIKit
 import Kingfisher
 
+protocol ProfileViewControllerProtocol {
+    var presenter: ProfilePresenterProtocol? { get set }
+    func setProfileDetails(name: String, nickname: String, bio: String?)
+    func setAvatar(url: URL)
+    func removeGradientLayersFromProfileDetails()
+}
+
 final class ProfileViewController: UIViewController {
 
-    private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
-    private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
+    var presenter: ProfilePresenterProtocol?
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
-    private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
     private var profileImageServiceObserver: NSObjectProtocol?
-
-    private var window: UIWindow {
-        guard let window = UIApplication.shared.windows.first else {
-            fatalError("Invalid Configuration: unable to get window from UIApplication")
-        }
-        return window
-    }
 
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
@@ -83,8 +81,8 @@ final class ProfileViewController: UIViewController {
         view.backgroundColor = .ypBlack
         addProfileImageServiceObserver()
         setupConstraints()
-        updateProfileDetails(from: profileService.profile)
-        updateAvatar()
+        presenter?.didUpdateProfileDetails()
+        presenter?.didUpdateAvatar()
     }
 
     @objc private func logoutButtonAction() {
@@ -93,18 +91,8 @@ final class ProfileViewController: UIViewController {
                                          buttonTitles: "Да", "Нет",
                                          buttonActions:
                                             { [weak self] in
-                                                self?.tokenStorage.setTokenValue(newValue: "")
-                                                WebViewViewController.clean()
-                                                self?.window.rootViewController = SplashViewController()
-                                                self?.window.makeKeyAndVisible() }, {  })
-    }
-
-    private func updateProfileDetails(from profile: Profile?) {
-        guard let profile = profile else { preconditionFailure("Unable to get user profile") }
-        removeGradientLayers(from: [nameLabel, nicknameLabel, statusLabel])
-        nameLabel.text = profile.name
-        nicknameLabel.text = profile.loginName
-        statusLabel.text = profile.bio
+                                                self?.presenter?.deleteCurrentAccessTokenAndCleanCash()
+                                                self?.presenter?.switchToSplashViewController() }, {  })
     }
 
     private func addProfileImageServiceObserver() {
@@ -113,33 +101,12 @@ final class ProfileViewController: UIViewController {
                 forName: ProfileImageService.didChangeNotification,
                 object: nil,
                 queue: .main) { [weak self] _ in
-                    self?.updateAvatar()
+                    self?.presenter?.didUpdateAvatar()
                 }
     }
 
-    private func updateAvatar() {
-        guard
-            let profileImageURL = profileImageService.avatarURL,
-            let url = URL(string: profileImageURL)
-        else { return }
-        let cache = ImageCache.default
-        cache.clearCache()
-        avatarImageView.kf.setImage(with: url,
-                                    placeholder: avatarPlaceholder) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let value):
-                self.removeGradientLayers(from: [self.avatarImageView])
-                self.avatarImageView.image = value.image
-            case .failure(let error):
-                print("ERROR update avatar: ", error.errorCode, " ", error.localizedDescription)
-                self.updateAvatar()
-            }
-        }
-    }
-
-    private func removeGradientLayers(from views: [UIView]) {
-        views.forEach { $0.layer.sublayers?.removeAll() }
+    private func removeGradientLayerFromAvatar() {
+        avatarImageView.layer.sublayers?.removeAll()
     }
 
     private func setupConstraints() {
@@ -166,5 +133,34 @@ final class ProfileViewController: UIViewController {
             statusLabel.topAnchor.constraint(equalTo: nicknameLabel.bottomAnchor, constant: inset),
             statusLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 2 * inset)
         ])
+    }
+}
+
+// MARK: - ProfileViewControllerProtocol
+
+extension ProfileViewController: ProfileViewControllerProtocol {
+
+    func setProfileDetails(name: String, nickname: String, bio: String?) {
+        nameLabel.text = name
+        nicknameLabel.text = nickname
+        statusLabel.text = bio
+    }
+
+    func setAvatar(url: URL) {
+        ImageCache.default.clearCache()
+        avatarImageView.kf.setImage(with: url, placeholder: avatarPlaceholder) { [weak self] result in
+            switch result {
+            case .success(let value):
+                self?.removeGradientLayerFromAvatar()
+                self?.avatarImageView.image = value.image
+            case .failure(let error):
+                print("ERROR update avatar: ", error.errorCode, " ", error.localizedDescription)
+                self?.presenter?.didUpdateAvatar()
+            }
+        }
+    }
+
+    func removeGradientLayersFromProfileDetails() {
+        [nameLabel, nicknameLabel, statusLabel].forEach { $0.layer.sublayers?.removeAll() }
     }
 }
