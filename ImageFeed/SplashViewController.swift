@@ -69,9 +69,15 @@ final class SplashViewController: UIViewController {
         guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController else {
             preconditionFailure("Unable to get tabBarController from Storyboard")
         }
+        guard let imagesListViewController = tabBarController.viewControllers?[0] as? ImagesListViewController else {
+            preconditionFailure("Unable to get imagesListViewController from tabBarController")
+        }
         guard let profileViewController = tabBarController.viewControllers?[1] as? ProfileViewController else {
             preconditionFailure("Unable to get profileViewController from tabBarController")
         }
+        let imagesListPresenter = ImagesListPresenter()
+        imagesListViewController.presenter = imagesListPresenter
+        imagesListPresenter.view = imagesListViewController
         let profilePresenter = ProfilePresenter()
         profileViewController.presenter = profilePresenter
         profilePresenter.view = profileViewController
