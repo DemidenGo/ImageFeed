@@ -19,9 +19,17 @@ protocol ProfilePresenterProtocol {
 final class ProfilePresenter: ProfilePresenterProtocol {
 
     var view: ProfileViewControllerProtocol?
-    private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
-    private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
-    private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
+    let profileService: ProfileServiceProtocol
+    let profileImageService: ProfileImageServiceProtocol
+    let tokenStorage: AuthTokenStorageProtocol
+
+    init(profileService: ProfileServiceProtocol = ProfileService.shared,
+         profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared,
+         tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared) {
+        self.profileService = profileService
+        self.profileImageService = profileImageService
+        self.tokenStorage = tokenStorage
+    }
 
     func didUpdateProfileDetails() {
         guard let profile = profileService.profile else { preconditionFailure("Unable to get user profile") }
