@@ -73,9 +73,7 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
     }
 
     func changeLike(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let photo = photos[safe: indexPath.row] else {
-            preconditionFailure("Unable to get photo for cell with clicked likeButton")
-        }
+        let photo = safeUnwrapLoadedPhoto(at: indexPath)
         imagesListService.changeLike(photoID: photo.id, isLike: !photo.isLiked) { [weak self] result in
             switch result {
             case .success(_):
@@ -92,9 +90,9 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
     }
 
     private func safeUnwrapLoadedPhoto(at indexPath: IndexPath) -> Photo {
-        guard let loadedPhoto = photos[safe: indexPath.row] else {
+        guard let photo = photos[safe: indexPath.row] else {
             preconditionFailure("ERROR: unable to get photo from photos array using cell indexPath")
         }
-        return loadedPhoto
+        return photo
     }
 }

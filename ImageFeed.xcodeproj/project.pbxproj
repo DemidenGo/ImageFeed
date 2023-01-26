@@ -32,6 +32,7 @@
 		927197B3293BCA7E0026DA38 /* OAuthTokenResponseBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 927197B2293BCA7E0026DA38 /* OAuthTokenResponseBody.swift */; };
 		927197B6293BCC360026DA38 /* OAuth2Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 927197B5293BCC360026DA38 /* OAuth2Service.swift */; };
 		927F438B297FC14900E6A068 /* ProfileViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 927F438A297FC14900E6A068 /* ProfileViewTests.swift */; };
+		92851C6029816E5900036698 /* ImagesListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92851C5F29816E5900036698 /* ImagesListTests.swift */; };
 		9286AAAB296051E10029A921 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 9286AAAA296051E10029A921 /* Kingfisher */; };
 		9298FB7229602E3D00EA7566 /* ErrorAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9298FB7129602E3D00EA7566 /* ErrorAlertPresenter.swift */; };
 		9299E15529473C760008DF19 /* ProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 9299E15429473C760008DF19 /* ProgressHUD */; };
@@ -96,6 +97,7 @@
 		927197B2293BCA7E0026DA38 /* OAuthTokenResponseBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokenResponseBody.swift; sourceTree = "<group>"; };
 		927197B5293BCC360026DA38 /* OAuth2Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuth2Service.swift; sourceTree = "<group>"; };
 		927F438A297FC14900E6A068 /* ProfileViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewTests.swift; sourceTree = "<group>"; };
+		92851C5F29816E5900036698 /* ImagesListTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesListTests.swift; sourceTree = "<group>"; };
 		9298FB7129602E3D00EA7566 /* ErrorAlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorAlertPresenter.swift; sourceTree = "<group>"; };
 		929C20BC29740D6E009FB2FE /* CellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellViewModel.swift; sourceTree = "<group>"; };
 		929C20BE29742592009FB2FE /* Placeholders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Placeholders.swift; sourceTree = "<group>"; };
@@ -291,6 +293,7 @@
 				92F74D18297A790D0012E1A9 /* WebViewTests.swift */,
 				929FF89F297A83F7002B6F13 /* AuthHelperTests.swift */,
 				927F438A297FC14900E6A068 /* ProfileViewTests.swift */,
+				92851C5F29816E5900036698 /* ImagesListTests.swift */,
 			);
 			path = ImageFeedTests;
 			sourceTree = "<group>";
@@ -455,6 +458,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				92F74D19297A790D0012E1A9 /* WebViewTests.swift in Sources */,
+				92851C6029816E5900036698 /* ImagesListTests.swift in Sources */,
 				927F438B297FC14900E6A068 /* ProfileViewTests.swift in Sources */,
 				929FF8A0297A83F7002B6F13 /* AuthHelperTests.swift in Sources */,
 			);
