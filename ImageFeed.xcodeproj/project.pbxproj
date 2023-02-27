@@ -44,6 +44,7 @@
 		92D3B2CC297A8B7A005A8E28 /* ProfilePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D3B2CB297A8B7A005A8E28 /* ProfilePresenter.swift */; };
 		92D3B2CE297FBAEE005A8E28 /* Simplifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D3B2CD297FBAEE005A8E28 /* Simplifiers.swift */; };
 		92D3B2D0297FBC67005A8E28 /* WKWebView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D3B2CF297FBC67005A8E28 /* WKWebView+Extensions.swift */; };
+		92E6903B2987FF0B009681B9 /* GradientCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E6903A2987FF0B009681B9 /* GradientCell.swift */; };
 		92E8B67B2922305400170888 /* ImagesListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E8B66B2922305400170888 /* ImagesListViewController.swift */; };
 		92E8B67C2922305400170888 /* ImagesListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E8B66C2922305400170888 /* ImagesListCell.swift */; };
 		92E8B67D2922305400170888 /* YS Display Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92E8B66F2922305400170888 /* YS Display Regular.ttf */; };
@@ -106,6 +107,7 @@
 		92D3B2CB297A8B7A005A8E28 /* ProfilePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenter.swift; sourceTree = "<group>"; };
 		92D3B2CD297FBAEE005A8E28 /* Simplifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Simplifiers.swift; sourceTree = "<group>"; };
 		92D3B2CF297FBC67005A8E28 /* WKWebView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWebView+Extensions.swift"; sourceTree = "<group>"; };
+		92E6903A2987FF0B009681B9 /* GradientCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientCell.swift; sourceTree = "<group>"; };
 		92E8B66B2922305400170888 /* ImagesListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagesListViewController.swift; sourceTree = "<group>"; };
 		92E8B66C2922305400170888 /* ImagesListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagesListCell.swift; sourceTree = "<group>"; };
 		92E8B66F2922305400170888 /* YS Display Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "YS Display Regular.ttf"; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				92E8B66B2922305400170888 /* ImagesListViewController.swift */,
 				9217A2712981151B00A4119F /* ImagesListPresenter.swift */,
 				92E8B66C2922305400170888 /* ImagesListCell.swift */,
+				92E6903A2987FF0B009681B9 /* GradientCell.swift */,
 				92517225296D94FC00F6749D /* ImagesListCellDelegate.swift */,
 			);
 			path = ImagesList;
@@ -422,6 +425,7 @@
 				9264E7DC2935FF0F000DAE71 /* WebViewViewController.swift in Sources */,
 				927197B3293BCA7E0026DA38 /* OAuthTokenResponseBody.swift in Sources */,
 				927197B6293BCC360026DA38 /* OAuth2Service.swift in Sources */,
+				92E6903B2987FF0B009681B9 /* GradientCell.swift in Sources */,
 				925C7B062979CD53001A8A9A /* WebViewPresenter.swift in Sources */,
 				92E8B6822922305400170888 /* UIView+Extensions.swift in Sources */,
 				9215ECFF2926169100261414 /* ProfileViewController.swift in Sources */,

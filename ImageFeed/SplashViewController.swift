@@ -65,14 +65,10 @@ final class SplashViewController: UIViewController {
     }
 
     private func switchToTabBarController() {
-        guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController else {
-            preconditionFailure("Unable to get tabBarController from Storyboard")
-        }
-        guard let imagesListViewController = tabBarController.viewControllers?[0] as? ImagesListViewController else {
-            preconditionFailure("Unable to get imagesListViewController from tabBarController")
-        }
-        guard let profileViewController = tabBarController.viewControllers?[1] as? ProfileViewController else {
-            preconditionFailure("Unable to get profileViewController from tabBarController")
+        guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController,
+              let imagesListViewController = tabBarController.viewControllers?[safe: 0] as? ImagesListViewController,
+              let profileViewController = tabBarController.viewControllers?[safe: 1] as? ProfileViewController else {
+            preconditionFailure("Unable to get tabBarController with viewControllers from Storyboard")
         }
         let imagesListPresenter = ImagesListPresenter()
         imagesListViewController.presenter = imagesListPresenter
@@ -85,11 +81,10 @@ final class SplashViewController: UIViewController {
     }
 
     private func switchToAuthViewController() {
-        guard let navigationController = mainStoryboard.instantiateViewController(withIdentifier: "NavigationController") as? UINavigationController else {
-            preconditionFailure("Unable to get NavigationController from Storyboard")
-        }
-        guard let authViewController = navigationController.viewControllers.first as? AuthViewController else {
-            preconditionFailure("Unable to get AuthViewController from NavigationController")
+        guard let navigationController = mainStoryboard.instantiateViewController(
+            withIdentifier: "NavigationController") as? UINavigationController,
+              let authViewController = navigationController.viewControllers[safe: 0] as? AuthViewController else {
+            preconditionFailure("Unable to get NavigationController or AuthViewController from Storyboard")
         }
         authViewController.delegate = self
         window.rootViewController = navigationController

@@ -19,9 +19,9 @@ protocol ProfilePresenterProtocol {
 final class ProfilePresenter: ProfilePresenterProtocol {
 
     var view: ProfileViewControllerProtocol?
-    let profileService: ProfileServiceProtocol
-    let profileImageService: ProfileImageServiceProtocol
-    let tokenStorage: AuthTokenStorageProtocol
+    private let profileService: ProfileServiceProtocol
+    private let profileImageService: ProfileImageServiceProtocol
+    private let tokenStorage: AuthTokenStorageProtocol
 
     init(profileService: ProfileServiceProtocol = ProfileService.shared,
          profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared,

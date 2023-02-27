@@ -57,9 +57,18 @@ final class ImagesListPresenterSpy: ImagesListPresenterProtocol {
     var view: ImagesListViewControllerProtocol?
     let imagesListService: ImagesListServiceProtocol
     var photos = [Photo]()
+    var shouldUpdateTableViewСalls = false
     var fetchNextPageOfPhotosCalls = false
     var largeImageURLCalls = false
-    var shouldUpdateTableViewCalls = false
+
+    var shouldUpdateTableView: Bool {
+        shouldUpdateTableViewСalls = true
+        return false
+    }
+
+    var newIndexPaths: [IndexPath] {
+        return [indexPathStub]
+    }
 
     init(imagesListService: ImagesListServiceProtocol = ImagesListService.shared) {
         self.imagesListService = imagesListService
@@ -75,13 +84,6 @@ final class ImagesListPresenterSpy: ImagesListPresenterProtocol {
         return nil
     }
 
-    func shouldUpdateTableView() -> Bool {
-        shouldUpdateTableViewCalls = true
-        return false
-    }
-
-    func calculateNewIndexPaths() -> [IndexPath] { return [indexPathStub] }
-    func shouldReloadTableRow(at indexPath: IndexPath) -> Bool { false }
     func prepareViewModelForCell(with: IndexPath) -> CellViewModel { cellViewModelStub }
     func shouldFetchNextPageOfPhotos(for indexPath: IndexPath) -> Bool {false}
     func changeLike(for cell: ImagesListCell, with indexPath: IndexPath) {   }
@@ -169,7 +171,7 @@ final class ImagesListTests: XCTestCase {
         _ = imagesListViewController.view
 
         // Then
-        XCTAssertTrue(imagesListPresenter.shouldUpdateTableViewCalls)
+        XCTAssertTrue(imagesListPresenter.shouldUpdateTableViewСalls)
     }
 
     // MARK: - Test Presenter calls ViewController
@@ -219,7 +221,7 @@ final class ImagesListTests: XCTestCase {
         }
         
         // Then
-        XCTAssertTrue(imagesListPresenter.shouldUpdateTableView())
+        XCTAssertTrue(imagesListPresenter.shouldUpdateTableView)
     }
 
     func testNotNeedUpdateTableView() {
@@ -231,60 +233,23 @@ final class ImagesListTests: XCTestCase {
         imagesListServiceStub.photos = []
 
         // Then
-        XCTAssertFalse(imagesListPresenter.shouldUpdateTableView())
+        XCTAssertFalse(imagesListPresenter.shouldUpdateTableView)
     }
 
     func testCalculateNewIndexPaths() {
         // Given
-        let imagesListPresenter = ImagesListPresenter()
-        imagesListPresenter.oldRowCount = 0
-        imagesListPresenter.newRowCount = 10
+        let imageListService = ImagesListServiceStub()
+        for _ in 0...9 {
+            imageListService.photos.append(photoStub)
+        }
+        let imagesListPresenter = ImagesListPresenter(imagesListService: imageListService)
 
         // When
-        let newIndexPaths = imagesListPresenter.calculateNewIndexPaths()
+        _ = imagesListPresenter.shouldUpdateTableView
+        let newIndexPaths = imagesListPresenter.newIndexPaths
 
         // Then
         XCTAssertEqual(newIndexPaths.count, 10)
-    }
-
-    func testNeedReloadTableRow() {
-        // Given
-        // Placeholder size - (343.0, 252.0)
-        let imagesListPresenter = ImagesListPresenter()
-        let photo = Photo(id: "test",
-                          size: CGSize(width: 400, height: 300),
-                          createdAt: "test",
-                          description: "test",
-                          thumbImageURL: "test",
-                          largeImageURL: "test",
-                          isLiked: false)
-        imagesListPresenter.photos.append(photo)
-
-        // When
-        let isNeed = imagesListPresenter.shouldReloadTableRow(at: indexPathStub)
-
-        // Then
-        XCTAssertTrue(isNeed)
-    }
-
-    func testNotNeedReloadTableRow() {
-        // Given
-        // Placeholder size - (343.0, 252.0)
-        let imagesListPresenter = ImagesListPresenter()
-        let photo = Photo(id: "test",
-                          size: CGSize(width: 343, height: 252),
-                          createdAt: "test",
-                          description: "test",
-                          thumbImageURL: "test",
-                          largeImageURL: "test",
-                          isLiked: false)
-        imagesListPresenter.photos.append(photo)
-
-        // When
-        let isNeed = imagesListPresenter.shouldReloadTableRow(at: indexPathStub)
-
-        // Then
-        XCTAssertFalse(isNeed)
     }
 
     func testNeedFetchNextPageOfPhotos() {

@@ -24,10 +24,10 @@ final class WebViewPresenterSpy: WebViewPresenterProtocol {
     }
 }
 
-final class WebViewViewControllerSpy: WebViewViewControllerProtocol {
-
+final class WebViewViewControllerSpy: UIViewController, WebViewViewControllerProtocol {
     var loadRequestCalled = false
     var presenter: WebViewPresenterProtocol?
+    var delegate: WebViewViewControllerDelegate?
 
     func load(request: URLRequest) {
         loadRequestCalled = true

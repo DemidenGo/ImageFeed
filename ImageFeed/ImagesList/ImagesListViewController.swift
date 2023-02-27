@@ -18,6 +18,7 @@ protocol ImagesListViewControllerProtocol {
 
 final class ImagesListViewController: UIViewController {
 
+    private var state: DisplayState = .loading
     var presenter: ImagesListPresenterProtocol?
     var strongPresenter: ImagesListPresenterProtocol {
         guard let presenter = presenter else {
@@ -29,6 +30,11 @@ final class ImagesListViewController: UIViewController {
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)    
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
 
+    private enum DisplayState {
+        case loading
+        case success
+    }
+
     @IBOutlet private var tableView: UITableView!
 
     override func viewDidLoad() {
@@ -36,6 +42,11 @@ final class ImagesListViewController: UIViewController {
         setupTableView()
         addImagesListServiceObserver()
         strongPresenter.fetchNextPageOfPhotos()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        ProgressHUD.dismiss()
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -57,6 +68,7 @@ final class ImagesListViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.identifier)
+        tableView.register(GradientCell.self, forCellReuseIdentifier: GradientCell.identifier)
     }
 
     private func addImagesListServiceObserver() {
@@ -70,21 +82,20 @@ final class ImagesListViewController: UIViewController {
     }
 
     private func updateTableViewAnimated() {
-        if strongPresenter.shouldUpdateTableView() {
+        if strongPresenter.shouldUpdateTableView {
             tableView.performBatchUpdates {
-                let newIndexPaths = strongPresenter.calculateNewIndexPaths()
+                let newIndexPaths = strongPresenter.newIndexPaths
                 tableView.insertRows(at: newIndexPaths, with: .automatic)
             } completion: { _ in }
         }
     }
 
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
+        state = .loading
         let cellViewModel = strongPresenter.prepareViewModelForCell(with: indexPath)
-        let shouldReloadTableRow = strongPresenter.shouldReloadTableRow(at: indexPath)
         cell.configure(with: cellViewModel) { [weak self] in
-            if shouldReloadTableRow {
-                self?.tableView.reloadRows(at: [indexPath], with: .automatic)
-            }
+            self?.state = .success
+            self?.tableView.reloadRows(at: [indexPath], with: .automatic)
         }
     }
 }
@@ -100,15 +111,20 @@ extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.identifier, for: indexPath)
-
         guard let imagesListCell = cell as? ImagesListCell else {
             print("Type casting error for ImagesListCell")
             return UITableViewCell()
         }
-
         imagesListCell.delegate = self
         configCell(for: imagesListCell, with: indexPath)
-        return imagesListCell
+
+        switch state {
+        case .loading:
+            let gradientCell = tableView.dequeueReusableCell(withIdentifier: GradientCell.identifier, for: indexPath)
+            return gradientCell
+        case .success:
+            return imagesListCell
+        }
     }
 }
 

@@ -28,11 +28,6 @@ final class ImagesListCell: UITableViewCell {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.contentMode = .scaleAspectFill
-        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(
-            size: CGSize(width: UIScreen.main.bounds.width - 32,
-                         height: thumbImagePlaceholderSize.height)
-        )
-        view.layer.addSublayer(gradient)
         return view
     }()
 
@@ -80,12 +75,6 @@ final class ImagesListCell: UITableViewCell {
         photoImageView.image = nil
         dateLabel.text = nil
         likeButton.setImage(likeNoActiveImage, for: .normal)
-        // Накладываем анимированный градиент
-        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(
-            size: CGSize(width: UIScreen.main.bounds.width - 32,
-                         height: thumbImagePlaceholderSize.height)
-        )
-        photoImageView.layer.addSublayer(gradient)
     }
 
     func setIsLiked(_ isLiked: Bool) {
@@ -94,16 +83,11 @@ final class ImagesListCell: UITableViewCell {
 
     func configure(with viewModel: CellViewModel, _ completion: @escaping  () -> Void) {
         photoImageView.kf.setImage(with: viewModel.thumbImageURL,
-                                   placeholder: thumbImagePlaceholder) { [weak self] _ in
-            self?.removeGradientLayer()
+                                   placeholder: thumbImagePlaceholder) { _ in
             completion()
         }
         setIsLiked(viewModel.isLiked)
         dateLabel.text = viewModel.createdAt
-    }
-
-    func removeGradientLayer() {
-        photoImageView.layer.sublayers?.removeAll()
     }
 
     @objc private func likeButtonAction() {

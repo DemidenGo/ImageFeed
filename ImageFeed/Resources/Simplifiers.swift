@@ -17,3 +17,7 @@ var window: UIWindow {
     }
     return window
 }
+
+var screenWidth: CGFloat {
+    UIScreen.main.bounds.width
+}

@@ -11,6 +11,8 @@ final class AuthViewController: UIViewController {
 
     // держим сильную ссылку на SplashViewController, иначе он будет удалён из памяти
     var delegate: AuthViewControllerDelegate?
+    var webViewPresenter: WebViewPresenterProtocol = WebViewPresenter()
+    var webViewViewController: WebViewViewControllerProtocol = WebViewViewController()
 
     private lazy var logoImageView: UIImageView = {
         let view = UIImageView()
@@ -50,9 +52,6 @@ final class AuthViewController: UIViewController {
     }
 
     func presentWebViewViewController() {
-        let authHelper = AuthHelper()
-        let webViewViewController = WebViewViewController()
-        let webViewPresenter = WebViewPresenter(authHelper: authHelper)
         webViewViewController.delegate = self
         webViewViewController.presenter = webViewPresenter
         webViewPresenter.view = webViewViewController

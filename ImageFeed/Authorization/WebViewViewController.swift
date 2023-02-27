@@ -8,8 +8,9 @@
 import UIKit
 import WebKit
 
-public protocol WebViewViewControllerProtocol: AnyObject {
+protocol WebViewViewControllerProtocol: UIViewController {
     var presenter: WebViewPresenterProtocol? { get set }
+    var delegate: WebViewViewControllerDelegate? { get set }
     func load(request: URLRequest)
     func setProgressValue(_ newValue: Float)
     func setProgressHidden(_ isHidden: Bool)
@@ -18,9 +19,7 @@ public protocol WebViewViewControllerProtocol: AnyObject {
 final class WebViewViewController: UIViewController {
 
     var presenter: WebViewPresenterProtocol?
-
     weak var delegate: WebViewViewControllerDelegate?
-
     private var estimatedProgressObservation: NSKeyValueObservation?
 
     private lazy var webView: WKWebView = {

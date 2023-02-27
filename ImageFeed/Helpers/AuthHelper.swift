@@ -14,7 +14,7 @@ protocol AuthHelperProtocol {
 
 final class AuthHelper: AuthHelperProtocol {
 
-    let configuration: AuthConfiguration
+    private let configuration: AuthConfiguration
 
     init(configuration: AuthConfiguration = .standard) {
         self.configuration = configuration
@@ -33,9 +33,8 @@ final class AuthHelper: AuthHelperProtocol {
             let codeItem = items.first(where: { $0.name == "code" })
         {
             return codeItem.value
-        } else {
-            return nil
         }
+        return nil
     }
 
     func authURL() -> URL {

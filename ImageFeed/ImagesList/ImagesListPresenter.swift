@@ -10,10 +10,9 @@ import UIKit
 protocol ImagesListPresenterProtocol {
     var view: ImagesListViewControllerProtocol? { get set }
     var photos: [Photo] { get set }
+    var shouldUpdateTableView: Bool { get }
+    var newIndexPaths: [IndexPath] { get }
     func largeImageURL(for indexPath: IndexPath) -> URL?
-    func shouldUpdateTableView() -> Bool
-    func shouldReloadTableRow(at indexPath: IndexPath) -> Bool
-    func calculateNewIndexPaths() -> [IndexPath]
     func prepareViewModelForCell(with: IndexPath) -> CellViewModel
     func fetchNextPageOfPhotos()
     func shouldFetchNextPageOfPhotos(for indexPath: IndexPath) -> Bool
@@ -23,10 +22,24 @@ protocol ImagesListPresenterProtocol {
 final class ImagesListPresenter: ImagesListPresenterProtocol {
     
     var view: ImagesListViewControllerProtocol?
-    let imagesListService: ImagesListServiceProtocol
     lazy var photos = [Photo]()
-    lazy var oldRowCount = 0
-    lazy var newRowCount = 0
+    private let imagesListService: ImagesListServiceProtocol
+    private lazy var oldRowCount = 0
+    private lazy var newRowCount = 0
+
+    var shouldUpdateTableView: Bool {
+        oldRowCount = photos.count
+        newRowCount = imagesListService.photos.count
+        photos = imagesListService.photos
+        return oldRowCount != newRowCount
+    }
+
+    var newIndexPaths: [IndexPath] {
+        let newIndexPaths = (oldRowCount..<newRowCount).map { i in
+            IndexPath(row: i, section: 0)
+        }
+        return newIndexPaths
+    }
 
     init(imagesListService: ImagesListServiceProtocol = ImagesListService.shared) {
         self.imagesListService = imagesListService
@@ -40,28 +53,9 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
         return largeImageURL
     }
 
-    func shouldUpdateTableView() -> Bool {
-        oldRowCount = photos.count
-        newRowCount = imagesListService.photos.count
-        photos = imagesListService.photos
-        return oldRowCount != newRowCount
-    }
-
-    func calculateNewIndexPaths() -> [IndexPath] {
-        let newIndexPaths = (oldRowCount..<newRowCount).map { i in
-            IndexPath(row: i, section: 0)
-        }
-        return newIndexPaths
-    }
-
     func prepareViewModelForCell(with indexPath: IndexPath) -> CellViewModel {
         let loadedPhoto = safeUnwrapLoadedPhoto(at: indexPath)
         return loadedPhoto.convertToCellViewModel()
-    }
-
-    func shouldReloadTableRow(at indexPath: IndexPath) -> Bool {
-        let loadedPhoto = safeUnwrapLoadedPhoto(at: indexPath)
-        return loadedPhoto.size != thumbImagePlaceholderSize
     }
 
     func fetchNextPageOfPhotos() {
