@@ -8,29 +8,28 @@
 import UIKit
 import Kingfisher
 
+protocol ProfileViewControllerProtocol {
+    var presenter: ProfilePresenterProtocol? { get set }
+    func setProfileDetails(name: String, nickname: String, bio: String?)
+    func setAvatar(url: URL)
+    func removeGradientLayersFromProfileDetails()
+}
+
 final class ProfileViewController: UIViewController {
 
-    private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
-    private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
+    var presenter: ProfilePresenterProtocol?
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
-    private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
     private var profileImageServiceObserver: NSObjectProtocol?
-
-    private var window: UIWindow {
-        guard let window = UIApplication.shared.windows.first else {
-            fatalError("Invalid Configuration: unable to get window from UIApplication")
-        }
-        return window
-    }
 
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.backgroundColor = .ypBlack
-        imageView.image = UIImage(named: "avatar.png")
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 35
         imageView.layer.masksToBounds = true
+        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(size: CGSize(width: 70, height: 70))
+        imageView.layer.addSublayer(gradient)
         return imageView
     }()
 
@@ -48,27 +47,30 @@ final class ProfileViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 1
         label.adjustsFontSizeToFitWidth = true
-        label.text = "Юрий Демиденко"
         label.font = UIFont(name: "YSDisplay-Bold", size: 23)
         label.textColor = .ypWhite
+        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(size: CGSize(width: 223, height: 20))
+        label.layer.addSublayer(gradient)
         return label
     }()
 
     lazy var nicknameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "@demidengo"
         label.font = UIFont(name: "YSDisplay-Regular", size: 13)
         label.textColor = .ypGray
+        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(size: CGSize(width: 89, height: 18))
+        label.layer.addSublayer(gradient)
         return label
     }()
 
     lazy var statusLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Hello, world!"
         label.font = UIFont(name: "YSDisplay-Regular", size: 13)
         label.textColor = .ypWhite
+        let gradient = CAGradientLayer.makeGradientLayerWithAnimation(size: CGSize(width: 67, height: 18))
+        label.layer.addSublayer(gradient)
         return label
     }()
 
@@ -79,8 +81,8 @@ final class ProfileViewController: UIViewController {
         view.backgroundColor = .ypBlack
         addProfileImageServiceObserver()
         setupConstraints()
-        updateProfileDetails(from: profileService.profile)
-        updateAvatar()
+        presenter?.didUpdateProfileDetails()
+        presenter?.didUpdateAvatar()
     }
 
     @objc private func logoutButtonAction() {
@@ -89,17 +91,8 @@ final class ProfileViewController: UIViewController {
                                          buttonTitles: "Да", "Нет",
                                          buttonActions:
                                             { [weak self] in
-                                                self?.tokenStorage.setTokenValue(newValue: "")
-                                                WebViewViewController.clean()
-                                                self?.window.rootViewController = SplashViewController()
-                                                self?.window.makeKeyAndVisible() }, {  })
-    }
-
-    private func updateProfileDetails(from profile: Profile?) {
-        guard let profile = profile else { preconditionFailure("Unable to get user profile") }
-        nameLabel.text = profile.name
-        nicknameLabel.text = profile.loginName
-        statusLabel.text = profile.bio
+                                                self?.presenter?.deleteCurrentAccessTokenAndCleanCash()
+                                                self?.presenter?.switchToSplashViewController() }, {  })
     }
 
     private func addProfileImageServiceObserver() {
@@ -108,28 +101,12 @@ final class ProfileViewController: UIViewController {
                 forName: ProfileImageService.didChangeNotification,
                 object: nil,
                 queue: .main) { [weak self] _ in
-                    self?.updateAvatar()
+                    self?.presenter?.didUpdateAvatar()
                 }
     }
 
-    private func updateAvatar() {
-        guard
-            let profileImageURL = profileImageService.avatarURL,
-            let url = URL(string: profileImageURL)
-        else { return }
-        let cache = ImageCache.default
-        cache.clearCache()
-        avatarImageView.kf.indicatorType = .activity
-        avatarImageView.kf.setImage(with: url,
-                                    placeholder: avatarPlaceholder) { [weak self] result in
-            switch result {
-            case .success(let value):
-                self?.avatarImageView.image = value.image
-            case .failure(let error):
-                print("ERROR update avatar: ", error.errorCode, " ", error.localizedDescription)
-                self?.updateAvatar()
-            }
-        }
+    private func removeGradientLayerFromAvatar() {
+        avatarImageView.layer.sublayers?.removeAll()
     }
 
     private func setupConstraints() {
@@ -156,5 +133,34 @@ final class ProfileViewController: UIViewController {
             statusLabel.topAnchor.constraint(equalTo: nicknameLabel.bottomAnchor, constant: inset),
             statusLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 2 * inset)
         ])
+    }
+}
+
+// MARK: - ProfileViewControllerProtocol
+
+extension ProfileViewController: ProfileViewControllerProtocol {
+
+    func setProfileDetails(name: String, nickname: String, bio: String?) {
+        nameLabel.text = name
+        nicknameLabel.text = nickname
+        statusLabel.text = bio
+    }
+
+    func setAvatar(url: URL) {
+        ImageCache.default.clearCache()
+        avatarImageView.kf.setImage(with: url, placeholder: avatarPlaceholder) { [weak self] result in
+            switch result {
+            case .success(let value):
+                self?.removeGradientLayerFromAvatar()
+                self?.avatarImageView.image = value.image
+            case .failure(let error):
+                print("ERROR update avatar: ", error.errorCode, " ", error.localizedDescription)
+                self?.presenter?.didUpdateAvatar()
+            }
+        }
+    }
+
+    func removeGradientLayersFromProfileDetails() {
+        [nameLabel, nicknameLabel, statusLabel].forEach { $0.layer.sublayers?.removeAll() }
     }
 }

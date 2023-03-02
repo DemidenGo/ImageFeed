@@ -8,15 +8,32 @@
 import UIKit
 import ProgressHUD
 
+protocol ImagesListViewControllerProtocol {
+    var presenter: ImagesListPresenterProtocol? { get set }
+    func set(cell: ImagesListCell, isLiked: Bool)
+    func presentAlert(message: String)
+}
+
 // MARK: - UIViewController
 
 final class ImagesListViewController: UIViewController {
 
+    private var state: DisplayState = .loading
+    var presenter: ImagesListPresenterProtocol?
+    var strongPresenter: ImagesListPresenterProtocol {
+        guard let presenter = presenter else {
+            preconditionFailure("Unable to get ImagesListPresenter")
+        }
+        return presenter
+    }
     private var imagesListServiceObserver: NSObjectProtocol?
-    private lazy var imagesListService: ImagesListServiceProtocol = ImagesListService.shared
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)    
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
-    private lazy var photos = [Photo]()
+
+    private enum DisplayState {
+        case loading
+        case success
+    }
 
     @IBOutlet private var tableView: UITableView!
 
@@ -24,17 +41,19 @@ final class ImagesListViewController: UIViewController {
         super.viewDidLoad()
         setupTableView()
         addImagesListServiceObserver()
-        imagesListService.fetchNextPageOfPhotos()
+        strongPresenter.fetchNextPageOfPhotos()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        ProgressHUD.dismiss()
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showSingleImageSegueIdentifier {
             let viewController = segue.destination as? SingleImageViewController
             let indexPath = sender as! IndexPath
-            guard let largeImageURLString = photos[safe: indexPath.row]?.largeImageURL else {
-                preconditionFailure("Unable to get largeImageURLString from photos array")
-            }
-            let largeImageURL = URL(string: largeImageURLString)
+            let largeImageURL = strongPresenter.largeImageURL(for: indexPath)
             ProgressHUD.show()
             viewController?.singleImageView.kf.setImage(with: largeImageURL, placeholder: largeImagePlaceholder) { _ in
                 viewController?.rescaleAndCenterImageInScrollView(image: viewController?.singleImageView.image)
@@ -49,6 +68,7 @@ final class ImagesListViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(ImagesListCell.self, forCellReuseIdentifier: ImagesListCell.identifier)
+        tableView.register(GradientCell.self, forCellReuseIdentifier: GradientCell.identifier)
     }
 
     private func addImagesListServiceObserver() {
@@ -62,29 +82,20 @@ final class ImagesListViewController: UIViewController {
     }
 
     private func updateTableViewAnimated() {
-        let oldRowCount = photos.count
-        let newRowCount = imagesListService.photos.count
-        photos = imagesListService.photos
-        if oldRowCount != newRowCount {
+        if strongPresenter.shouldUpdateTableView {
             tableView.performBatchUpdates {
-                let newIndexPaths = (oldRowCount..<newRowCount).map { i in
-                    IndexPath(row: i, section: 0)
-                }
+                let newIndexPaths = strongPresenter.newIndexPaths
                 tableView.insertRows(at: newIndexPaths, with: .automatic)
             } completion: { _ in }
         }
     }
 
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let loadedPhoto = photos[safe: indexPath.row] else {
-            preconditionFailure("ERROR: unable to get photo from photos array using cell indexPath")
-        }
-        let loadedPhotoHeight = loadedPhoto.size.height
-        let cellViewModel = loadedPhoto.convertToCellViewModel()
+        state = .loading
+        let cellViewModel = strongPresenter.prepareViewModelForCell(with: indexPath)
         cell.configure(with: cellViewModel) { [weak self] in
-            if loadedPhotoHeight != thumbImagePlaceholderHeight {
-                self?.tableView.reloadRows(at: [indexPath], with: .automatic)
-            }
+            self?.state = .success
+            self?.tableView.reloadRows(at: [indexPath], with: .automatic)
         }
     }
 }
@@ -94,21 +105,26 @@ final class ImagesListViewController: UIViewController {
 extension ImagesListViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photos.count
+        return strongPresenter.photos.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.identifier, for: indexPath)
-
         guard let imagesListCell = cell as? ImagesListCell else {
             print("Type casting error for ImagesListCell")
             return UITableViewCell()
         }
-
         imagesListCell.delegate = self
         configCell(for: imagesListCell, with: indexPath)
-        return imagesListCell
+
+        switch state {
+        case .loading:
+            let gradientCell = tableView.dequeueReusableCell(withIdentifier: GradientCell.identifier, for: indexPath)
+            return gradientCell
+        case .success:
+            return imagesListCell
+        }
     }
 }
 
@@ -121,8 +137,9 @@ extension ImagesListViewController: UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row + 1 == photos.count {
-            imagesListService.fetchNextPageOfPhotos()
+        let shouldFetchNextPageOfPhotos = strongPresenter.shouldFetchNextPageOfPhotos(for: indexPath)
+        if shouldFetchNextPageOfPhotos {
+            strongPresenter.fetchNextPageOfPhotos()
         }
     }
 }
@@ -132,26 +149,27 @@ extension ImagesListViewController: UITableViewDelegate {
 extension ImagesListViewController: ImagesListCellDelegate {
 
     func imagesListCellDidTapLike(_ cell: ImagesListCell) {
-        guard let indexPath = tableView.indexPath(for: cell),
-              let photo = photos[safe: indexPath.row] else {
-            preconditionFailure("Unable to found cell with clicked likeButton")
+        guard let indexPath = tableView.indexPath(for: cell) else {
+            preconditionFailure("Unable to get indexPath for cell with clicked likeButton")
         }
         UIBlockingProgressHUD.show()
-        imagesListService.changeLike(photoID: photo.id, isLike: !photo.isLiked) { [weak self] result in
-            switch result {
-            case .success(_):
-                guard let self = self else { return }
-                self.photos = self.imagesListService.photos
-                cell.setIsLiked(self.photos[indexPath.row].isLiked)
-                UIBlockingProgressHUD.dismiss()
-            case .failure(let error):
-                UIBlockingProgressHUD.dismiss()
-                print("ERROR: unable to change photos like", error)
-                let message = photo.isLiked ? "Не удалось снять лайк" : "Не удалось поставить лайк"
-                self?.errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
-                                                       message: message,
-                                                       buttonTitles: "Ок") {  }
-            }
-        }
+        strongPresenter.changeLike(for: cell, with: indexPath)
+    }
+}
+
+// MARK: - ImagesListViewControllerProtocol
+
+extension ImagesListViewController: ImagesListViewControllerProtocol {
+
+    func set(cell: ImagesListCell, isLiked: Bool) {
+        cell.setIsLiked(isLiked)
+        UIBlockingProgressHUD.dismiss()
+    }
+
+    func presentAlert(message: String) {
+        UIBlockingProgressHUD.dismiss()
+        errorAlertPresenter.presentAlert(title: "Что-то пошло не так(",
+                                               message: message,
+                                               buttonTitles: "Ок") {  }
     }
 }

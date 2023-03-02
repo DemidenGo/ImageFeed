@@ -31,7 +31,7 @@ final class ProfileImageService: ProfileImageServiceProtocol {
         guard let username = profileService.profile?.username else {
             preconditionFailure("Unable to get username")
         }
-        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+        let request = URLRequest.makeURLRequest(baseURL: Constants.defaultBaseURL,
                                                 pathComponent: "users/\(username)",
                                                 queryItems: nil,
                                                 requestHttpMethod: "GET",

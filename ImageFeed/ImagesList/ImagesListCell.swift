@@ -26,7 +26,6 @@ final class ImagesListCell: UITableViewCell {
 
     private lazy var photoImageView: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: "0")
         view.translatesAutoresizingMaskIntoConstraints = false
         view.contentMode = .scaleAspectFill
         return view
@@ -35,7 +34,6 @@ final class ImagesListCell: UITableViewCell {
     private lazy var dateLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "9 ноября 2022"
         label.textColor = .ypWhite
         label.font = UIFont(name: "YSDisplay-Regular", size: 13)
         return label
@@ -44,7 +42,6 @@ final class ImagesListCell: UITableViewCell {
     private lazy var likeButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setImage(UIImage(named: "LikeNoActive"), for: .normal)
         button.addTarget(self, action: #selector(likeButtonAction), for: .touchUpInside)
         return button
     }()
@@ -85,7 +82,6 @@ final class ImagesListCell: UITableViewCell {
     }
 
     func configure(with viewModel: CellViewModel, _ completion: @escaping  () -> Void) {
-        photoImageView.kf.indicatorType = .activity
         photoImageView.kf.setImage(with: viewModel.thumbImageURL,
                                    placeholder: thumbImagePlaceholder) { _ in
             completion()

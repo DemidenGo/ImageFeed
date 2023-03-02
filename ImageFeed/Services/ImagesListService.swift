@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import AVFoundation
 
 protocol ImagesListServiceProtocol {
     var photos: [Photo] { get }
@@ -26,7 +25,7 @@ final class ImagesListService: ImagesListServiceProtocol {
     private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
 
     func changeLike(photoID: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
-        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+        let request = URLRequest.makeURLRequest(baseURL: Constants.defaultBaseURL,
                                                 pathComponent: "/photos/\(photoID)/like",
                                                 queryItems: nil,
                                                 requestHttpMethod: isLike ? "POST" : "DELETE",
@@ -54,7 +53,7 @@ final class ImagesListService: ImagesListServiceProtocol {
 
     func fetchNextPageOfPhotos() {
         guard task == nil else { return }
-        let request = URLRequest.makeURLRequest(baseURL: defaultBaseURL,
+        let request = URLRequest.makeURLRequest(baseURL: Constants.defaultBaseURL,
                                                 pathComponent: "photos",
                                                 queryItems: [URLQueryItem(name: "page", value: String(nextPage))],
                                                 requestHttpMethod: "GET",

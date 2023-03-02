@@ -10,9 +10,9 @@ import UIKit
 let thumbImagePlaceholder = UIImage(named: "PlaceholderImageForFeed.png")
 let largeImagePlaceholder = UIImage(named: "LargeImagePlaceholder.png")
 let avatarPlaceholder = UIImage(named: "AvatarPlaceholder.png")
-var thumbImagePlaceholderHeight: CGFloat {
-    guard let height = thumbImagePlaceholder?.size.height else {
-        preconditionFailure("Unable to get height of thumbImagePlaceholder")
+var thumbImagePlaceholderSize: CGSize {
+    guard let size = thumbImagePlaceholder?.size else {
+        preconditionFailure("Unable to get size of thumbImagePlaceholder")
     }
-    return height
+    return size
 }

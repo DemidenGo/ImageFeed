@@ -8,35 +8,19 @@
 import UIKit
 import WebKit
 
+protocol WebViewViewControllerProtocol: UIViewController {
+    var presenter: WebViewPresenterProtocol? { get set }
+    var delegate: WebViewViewControllerDelegate? { get set }
+    func load(request: URLRequest)
+    func setProgressValue(_ newValue: Float)
+    func setProgressHidden(_ isHidden: Bool)
+}
+
 final class WebViewViewController: UIViewController {
 
+    var presenter: WebViewPresenterProtocol?
     weak var delegate: WebViewViewControllerDelegate?
-
-    private let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
     private var estimatedProgressObservation: NSKeyValueObservation?
-
-    private lazy var unsplashAuthorizeURLComponents: URLComponents = {
-        guard let components = URLComponents(string: unsplashAuthorizeURLString) else {
-            preconditionFailure("Unable to construct unsplashAuthorizeURLComponents")
-        }
-        var unsplashURLComponents = components
-        unsplashURLComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: accessKey),
-            URLQueryItem(name: "redirect_uri", value: redirectURI),
-            URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: accessScope)
-        ]
-        return unsplashURLComponents
-    }()
-
-    private lazy var unsplashAuthorizeURL: URL = {
-        guard let url = unsplashAuthorizeURLComponents.url else {
-            preconditionFailure("Unable to construct unsplashAuthorizeURL")
-        }
-        return url
-    }()
-
-    private lazy var urlRequest = URLRequest(url: unsplashAuthorizeURL)
 
     private lazy var webView: WKWebView = {
         let view = WKWebView()
@@ -70,28 +54,12 @@ final class WebViewViewController: UIViewController {
         addWebViewLoadObserver()
     }
 
-    static func clean() {
-        // Очищаем все куки из хранилища
-        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
-        // Запрашиваем все данные из локального хранилища
-        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-            records.forEach { record in
-                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {  })
-            }
-        }
-    }
-
-    private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = (1 - progressView.progress) <= 0.0001
-    }
-
     @objc private func backwardButtonAction() {
         delegate?.webViewViewControllerDidCancel(self)
     }
 
     private func configWebView() {
-        webView.load(urlRequest)
+        presenter?.viewDidLoad()
         webView.navigationDelegate = self
     }
 
@@ -99,7 +67,8 @@ final class WebViewViewController: UIViewController {
         estimatedProgressObservation = webView.observe(
             \.estimatedProgress,
              options: []) { [weak self] _, _ in
-                 self?.updateProgress()
+                 guard let self = self else { return }
+                 self.presenter?.didUpdateProgressValue(self.webView.estimatedProgress)
              }
     }
 
@@ -138,16 +107,26 @@ extension WebViewViewController: WKNavigationDelegate {
     }
 
     private func code(from navigationAction: WKNavigationAction) -> String? {
-        if
-            let url = navigationAction.request.url,
-            let urlComponents = URLComponents(string: url.absoluteString),
-            urlComponents.path == "/oauth/authorize/native",
-            let items = urlComponents.queryItems,
-            let codeItem = items.first(where: { $0.name == "code" })
-        {
-            return codeItem.value
-        } else {
-            return nil
+        if let url = navigationAction.request.url {
+            return presenter?.code(from: url)
         }
+        return nil
+    }
+}
+
+// MARK: - WebViewViewControllerProtocol
+
+extension WebViewViewController: WebViewViewControllerProtocol {
+
+    func load(request: URLRequest) {
+        webView.load(request)
+    }
+
+    func setProgressValue(_ newValue: Float) {
+        progressView.progress = newValue
+    }
+
+    func setProgressHidden(_ isHidden: Bool) {
+        progressView.isHidden = isHidden
     }
 }

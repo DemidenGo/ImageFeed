@@ -11,19 +11,11 @@ import ProgressHUD
 final class SplashViewController: UIViewController {
 
     private var isUserAuthorized = false
-    private let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
     private lazy var authService: AuthServiceProtocol = OAuth2Service()
     private lazy var tokenStorage: AuthTokenStorageProtocol = AuthTokenKeychainStorage.shared
     private lazy var profileService: ProfileServiceProtocol = ProfileService.shared
     private lazy var profileImageService: ProfileImageServiceProtocol = ProfileImageService.shared
     private lazy var errorAlertPresenter: ErrorAlertPresenterProtocol = ErrorAlertPresenter(viewController: self)
-
-    private var window: UIWindow {
-        guard let window = UIApplication.shared.windows.first else {
-            fatalError("Invalid Configuration: unable to get window from UIApplication")
-        }
-        return window
-    }
 
     private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
@@ -73,19 +65,26 @@ final class SplashViewController: UIViewController {
     }
 
     private func switchToTabBarController() {
-        guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController else {
-            preconditionFailure("Unable to get TabBarController from Storyboard")
+        guard let tabBarController = mainStoryboard.instantiateViewController(withIdentifier: "TabBarController") as? UITabBarController,
+              let imagesListViewController = tabBarController.viewControllers?[safe: 0] as? ImagesListViewController,
+              let profileViewController = tabBarController.viewControllers?[safe: 1] as? ProfileViewController else {
+            preconditionFailure("Unable to get tabBarController with viewControllers from Storyboard")
         }
+        let imagesListPresenter = ImagesListPresenter()
+        imagesListViewController.presenter = imagesListPresenter
+        imagesListPresenter.view = imagesListViewController
+        let profilePresenter = ProfilePresenter()
+        profileViewController.presenter = profilePresenter
+        profilePresenter.view = profileViewController
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
     }
 
     private func switchToAuthViewController() {
-        guard let navigationController = mainStoryboard.instantiateViewController(withIdentifier: "NavigationController") as? UINavigationController else {
-            preconditionFailure("Unable to get NavigationController from Storyboard")
-        }
-        guard let authViewController = navigationController.viewControllers.first as? AuthViewController else {
-            preconditionFailure("Unable to get AuthViewController from NavigationController")
+        guard let navigationController = mainStoryboard.instantiateViewController(
+            withIdentifier: "NavigationController") as? UINavigationController,
+              let authViewController = navigationController.viewControllers[safe: 0] as? AuthViewController else {
+            preconditionFailure("Unable to get NavigationController or AuthViewController from Storyboard")
         }
         authViewController.delegate = self
         window.rootViewController = navigationController
