@@ -1,5 +1,8 @@
 # Image Feed
 
+Многостраничное приложение предназначено для просмотра изображений через API Unsplash. Позволяет просматривать бесконечную ленту картинок и профиль пользователя. При разработке приложения изучалась работа с сетью и архитектурный паттерн MVP.  
+**Технологии:** MVP, UIKit, вёрстка кодом с использованием Autolayout, REST API, авторизация OAuth 2.0, URLSession, URLComponents, WebView, NotificationCenter, KVO, Kingfisher, SwiftKeychainWrapper, Decodable, DispatchQueue, Swift Package Manager (SPM), Core Animation, SplashViewController, Unit Tests, XCTest.
+
 ![AppScreenshot1](AppScreenshots/1.png) ![AppScreenshot2](AppScreenshots/2.png) ![AppScreenshot3](AppScreenshots/3.png) ![AppScreenshot4](AppScreenshots/4.png)
 
 # Ссылки
@@ -7,11 +10,7 @@
 - [Дизайн в Figma](https://tinyurl.com/image-feed-figma)
 - [Unsplash API](https://unsplash.com/documentation)
 
-# Назначение и цели приложения
-
-Многостраничное приложение предназначено для просмотра изображений через API Unsplash.
-
-Цели приложения:
+# Цели приложения
 
 - Просмотр бесконечной ленты картинок из Unsplash Editorial.
 - Просмотр краткой информации из профиля пользователя.
