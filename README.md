@@ -1,6 +1,7 @@
 # Image Feed
 
-Многостраничное приложение предназначено для просмотра изображений через API Unsplash. Позволяет просматривать бесконечную ленту картинок и профиль пользователя. При разработке приложения изучалась работа с сетью и архитектурный паттерн MVP.  
+Многостраничное приложение для просмотра изображений через [API Unsplash](https://unsplash.com/documentation). Позволяет просматривать бесконечную ленту картинок из Unsplash Editorial. Пользователи могут просматривать каждое изображение отдельно, добавлять изображения в избранное и удалять оттуда. Также имеется возможность просмотра краткой информации из профиля пользователя на сайте [unsplash.com](https://unsplash.com). В приложении реализована авторизация через [OAuth2 Unsplash](https://unsplash.com/documentation/user-authentication-workflow).
+
 **Технологии:** MVP, UIKit, вёрстка кодом с использованием Autolayout, REST API, авторизация OAuth 2.0, URLSession, URLComponents, WebView, NotificationCenter, KVO, Kingfisher, SwiftKeychainWrapper, Decodable, DispatchQueue, Swift Package Manager (SPM), Core Animation, SplashViewController, Unit Tests, XCTest.
 
 ![AppScreenshot1](AppScreenshots/1.png) ![AppScreenshot2](AppScreenshots/2.png) ![AppScreenshot3](AppScreenshots/3.png) ![AppScreenshot4](AppScreenshots/4.png)
